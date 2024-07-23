@@ -1,0 +1,107 @@
+<div class="main" style="width: 1200px;">
+	<!--左 章节-->
+	<div id="left">
+		<div class="block" style="min-height: 230px;">
+			<div class="blocktitle">
+				<span class="txt">操作设置</span>
+				<span class="txtr"></span>
+			</div>
+			<div class="blockcontent">
+				<div style="padding-left:10px">
+					<ul class="ulrow">
+						<li>
+							<label for="SendArticle">将配置发送到书评：</label>
+							<input type="checkbox" id="SendArticle" />
+						</li>
+						<li>
+							<label for="ePubEditerClose">生成后自动关闭：</label>
+							<input type="checkbox" id="ePubEditerClose" checked="true" />
+						</li>
+						<li>配置内容：</li>
+						<li>
+							<textarea id="CfgArea" class="textarea"></textarea>
+						</li>
+						<li><input type="button" id="EidterImportBtn" class="button" value="导入配置" /></li>
+						<li><input type="button" id="EidterBuildBtn" class="button" value="生成ePub" /></li>
+					</ul>
+					<div class="cb"></div>
+				</div>
+			</div>
+		</div>
+		<div class="block" style="min-height: 230px;">
+			<div class="blocktitle">
+				<span class="txt">分卷</span>
+				<span class="txtr"></span>
+			</div>
+			<div class="blockcontent">
+				<div style="padding-left:10px">
+					<ul id="VolumeUL" class="ulrow">
+
+					</ul>
+					<div class="cb"></div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!--左 章节-->
+	<div id="left">
+		<div class="block" style="min-height: 230px;">
+			<div class="blocktitle">
+				<span class="txt">推测插图位置</span>
+				<span class="txtr"></span>
+			</div>
+			<div class="blockcontent">
+				<div style="padding-left:10px">
+					<ul id="ImgUL" class="ulrow">
+
+					</ul>
+					<div class="cb"></div>
+				</div>
+			</div>
+		</div>
+		<div class="block" style="min-height: 230px;">
+			<div class="blocktitle">
+				<span class="txt">章节</span>
+				<span class="txtr"></span>
+			</div>
+			<div class="blockcontent">
+				<div style="padding-left:10px">
+					<ul id="ChapterUL" class="ulrow">
+
+					</ul>
+					<div class="cb"></div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!--右 内容-->
+	<div id="centerm">
+		<!--内容-->
+		<div id="content">
+			<table class="grid" width="100%" align="center">
+				<tbody>
+					<tr>
+						<td width="4%" align="center"><span style="font-size:16px;">分<br>卷<br>插<br>图</span></td>
+						<td>
+							<div ondragover="return false" id="VolumeImg" style="height:155px;overflow:auto">
+
+							</div>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+			<table class="grid" width="100%" align="center">
+				<caption>分卷内容</caption>
+				<tbody>
+					<tr>
+						<td>
+							<div id="VolumeText" style="height:500px;overflow: hidden scroll ;max-width: 900px;">
+							</div>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+	</div>
+
+</div>
