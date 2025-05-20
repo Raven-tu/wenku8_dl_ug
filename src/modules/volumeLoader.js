@@ -210,7 +210,7 @@ export const VolumeLoader = {
               const imgPathInEpub = `Images${imgUrl.pathname}`
 
               // 替换占位符为ePub内部img标签
-              contentNode.innerHTML = `<img src="../${imgPathInEpub}" alt="${cleanXmlIllegalChars(imgFileName)}" loading="lazy"/>` // 放入相对路径
+              contentNode.innerHTML = `<img src="../${imgPathInEpub}" alt="${cleanXmlIllegalChars(imgFileName)}"/>` // 放入相对路径
 
               imageCounter++
               const imageId = `${IMAGE_FILE_PREFIX}_${VolumeIndex}_${imageCounter}`
