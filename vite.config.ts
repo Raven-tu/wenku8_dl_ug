@@ -1,6 +1,6 @@
 import AutoImport from 'unplugin-auto-import/vite'
 import { defineConfig } from 'vite'
-import monkey, { cdn, util } from 'vite-plugin-monkey'
+import monkey, { util } from 'vite-plugin-monkey'
 import Package from './package.json'
 
 // https://vitejs.dev/config/
@@ -29,8 +29,8 @@ export default defineConfig({
         match: ['*://www.wenku8.net/*', '*://www.wenku8.cc/*'],
         require: [
           'https://cdn.jsdelivr.net/npm/opencc-js@1.0.5/dist/umd/full.js',
-          'https://cdn.jsdelivr.net/npm/jszip@2.6.1/dist/jszip.js',
-          'https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.js',
+          // 'https://cdn.jsdelivr.net/npm/jszip@2.6.1/dist/jszip.min.js',  // add on build
+          // 'https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js', // add on build
         ],
         connect: [
           'wenku8.com', // For book info, reviews
@@ -50,12 +50,9 @@ export default defineConfig({
       },
       build: {
         externalGlobals: {
-          // @require      https://cdn.jsdelivr.net/npm/opencc-js@1.0.5/dist/umd/full.js
-          // @require      https://cdn.jsdelivr.net/npm/jszip@2.6.1/dist/jszip.js
-          // @require      https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.js
-          'jszip': cdn.jsdelivr('JSZip', 'dist/jszip.min.js'),
-          'file-saver': cdn.jsdelivr('FileSaver', 'dist/FileSaver.min.js'),
-          'opencc-js': cdn.jsdelivr('OpenCC', 'dist/umd/full.js'),
+          'jszip': ['JSZip', 'https://cdn.jsdelivr.net/npm/jszip@2.6.1/dist/jszip.min.js'],
+          'file-saver': ['FileSaver', 'https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js'],
+          'opencc-js': ['OpenCC', 'https://cdn.jsdelivr.net/npm/opencc-js@1.0.5/dist/umd/full.js'],
         },
       },
     }),

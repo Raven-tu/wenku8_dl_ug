@@ -80,7 +80,7 @@ function addDownloadButtonsToCatalogPage() {
   titleElement.appendChild(epubAllEditButton)
 
   // 全本 分卷 ePub下载按钮
-  const aEleSubEpub = createTxtDownloadButton(' 分卷ePub下载(全本)', 'javascript:void(0);',true)
+  const aEleSubEpub = createTxtDownloadButton(' 分卷ePub下载(全本)', 'javascript:void(0);', true)
   aEleSubEpub.className = 'DownloadAllSub'
   aEleSubEpub.addEventListener('click', e => loopDownloadSub())
   titleElement.append(aEleSubEpub)
@@ -128,10 +128,11 @@ function createTxtDownloadButton(title, href, otherType = false) {
   button.style.lineHeight = 'normal' // 确保行高正常
 
   if (otherType) {
-    button.style.borderColor = '#ffe0b2'; // 柔和的橙色边框
-    button.style.backgroundColor = '#fff8e1'; // 非常浅的橙色背景
-    button.style.color = '#fb602d'; // 柔和的黄色文字
-  } else {
+    button.style.borderColor = '#ffe0b2' // 柔和的橙色边框
+    button.style.backgroundColor = '#fff8e1' // 非常浅的橙色背景
+    button.style.color = '#fb602d' // 柔和的黄色文字
+  }
+  else {
     button.style.borderColor = '#00bcd4' // 下载全部：青色边框
     button.style.backgroundColor = '#b2ebf2' // 下载全部：浅青色背景
     button.style.color = '#0047a7' // 下载全部：深青色文字
