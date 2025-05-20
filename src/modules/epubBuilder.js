@@ -46,6 +46,7 @@ export const EpubFileBuilder = {
     }
 
     bookInfo.refreshProgress(bookInfo, `开始生成ePub文件...`)
+    unsafeWindow._isUnderConstruction = true // 设置标志，表示正在构建中
     const zip = new JSZip()
     zip.file('mimetype', this.MIMETYPE, { compression: 'STORE' })
     zip.file('META-INF/container.xml', this.CONTAINER_XML)
@@ -157,6 +158,8 @@ export const EpubFileBuilder = {
       // 延迟销毁，给用户看一眼结果
       setTimeout(() => EpubEditor.destroy(), 1000)
     }
+    // 构建成功后，返回编辑器状态
+    return true
   },
 
   /**

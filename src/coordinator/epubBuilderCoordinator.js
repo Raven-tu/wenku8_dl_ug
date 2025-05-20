@@ -135,6 +135,15 @@ export class EpubBuilderCoordinator {
     // 这个方法可能不再需要，或者仅用于调试
     // this.tasksCompletedOrSkipped++;
     // this.tryBuildEpub();
+    new Promise((resolve) => {
+      // 延迟 1 秒，便于观察进度
+      setTimeout(() => {
+        resolve()
+      }, 1000)
+    })
+      .then(() => {
+        unsafeWindow._isUnderConstruction = false // 结束时清除标志
+      })
   }
 
   /**
@@ -144,6 +153,22 @@ export class EpubBuilderCoordinator {
   tryBuildEpub() {
     // EpubFileBuilder.build 内部会检查 XHRManager 的状态
     EpubFileBuilder.build(this)
+      .then((result) => {
+        // 构建遇到问题或没有准备好则跳过
+        if (!result || this.XHRFail) {
+          return
+        }
+
+        this.refreshProgress(this, 'ePub文件已成功生成。')
+        this.logger.logInfo('ePub文件已成功生成。', result)
+        // 重新启用生成按钮 (如果存在)
+        const buildBtn = document.getElementById('EidterBuildBtn')
+        if (buildBtn)
+          buildBtn.disabled = false
+      })
+      .finally(() => {
+        this.handleTaskCompletion()
+      })
   }
 
   /**

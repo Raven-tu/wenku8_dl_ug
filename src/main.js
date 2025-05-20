@@ -84,6 +84,18 @@ function addDownloadButtonsToCatalogPage() {
   titleElement.appendChild(epubAllButton)
   titleElement.appendChild(epubAllEditButton)
 
+  // 全本 分卷 ePub下载按钮
+  const aEleSubEpub = document.createElement('a')
+  aEleSubEpub.className = 'DownloadAllSub'
+  aEleSubEpub.textContent = ' 分卷ePub下载(全本)'
+  aEleSubEpub.href = 'javascript:void(0);'
+  aEleSubEpub.style.marginLeft = '5px'
+  aEleSubEpub.style.textDecoration = 'underline' // 样式上更像链接
+  aEleSubEpub.style.color = 'blue' // 样式上更像链接
+
+  titleElement.append(aEleSubEpub)
+  aEleSubEpub.addEventListener('click', e => loopDownloadSub())
+
   // 分卷下载链接和按钮
   document.querySelectorAll('td.vcss').forEach((vcssCell) => { // 修改选择器为 td.vcss
     const volumeName = vcssCell.childNodes[0]?.textContent?.trim()
@@ -120,8 +132,15 @@ function createDownloadButton(text, isEditMode, isDownloadAll) {
   button.style.marginLeft = '5px'
   button.style.textDecoration = 'underline' // 样式上更像链接
   button.style.color = 'blue' // 样式上更像链接
-  if (isDownloadAll)
+  button.className = 'ePubSub'
+  if (isEditMode) {
+    button.className = ''
+    button.classList.add('EditMode') // 用于编辑器模式隐藏
+  }
+  if (isDownloadAll) {
+    button.className = ''
     button.classList.add('DownloadAll') // 用于编辑器模式隐藏
+  }
   button.addEventListener('click', (event) => {
     // 禁用按钮，避免重复点击
     event.target.style.pointerEvents = 'none'
@@ -133,6 +152,80 @@ function createDownloadButton(text, isEditMode, isDownloadAll) {
     // 按钮在协调器完成或失败后重新启用 (由 EpubFileBuilder.build 处理)
   })
   return button
+}
+
+/**
+ * 循环下载分卷ePub (全本)
+ *
+ * 此函数会检查每个分卷的构建状态，并在不处于构建状态时点击下载链接。
+ * 如果处于构建状态，则会等待一段时间后再次检查。
+ * 如果等待时间超过设定的超时时间，则跳过当前元素。
+ *
+ * @returns {void}
+ */
+function loopDownloadSub() {
+  const elements = document.querySelectorAll('a.ePubSub')
+  const linksArray = Array.from(elements)
+  const delayBetweenClicks = 5000 // 每次点击后等待 5 秒
+  const checkInterval = 5000 // 检查构建状态的间隔 5 秒
+  const constructionTimeout = 60000 // 单个元素等待构建状态的最长总时间 60 秒
+
+  UILogger.logInfo('循环下载分卷ePub(全本)...')
+
+  // 此函数用于处理 linksArray 中的每个元素
+  function processElement(index) {
+    // 如果索引超出数组范围，表示所有元素都已处理完毕
+    if (index >= linksArray.length) {
+      UILogger.logInfo('所有分卷下载任务处理完毕。')
+      return
+    }
+
+    const currentLink = linksArray[index]
+    UILogger.logInfo(`开始处理链接: ${currentLink.href} (索引: ${index})`)
+
+    // 开始检查当前元素的构建状态，并记录开始时间
+    checkConstructionStatus(index, Date.now())
+  }
+
+  // 此函数递归检查构建状态，直到不再构建或超时
+  function checkConstructionStatus(index, startTime) {
+    const currentTime = Date.now()
+    const elapsedTime = currentTime - startTime // 计算已等待的时间
+
+    // 确保 unsafeWindow 和 _isUnderConstruction 属性存在
+    const isUnderConstruction = typeof unsafeWindow !== 'undefined' && unsafeWindow._isUnderConstruction
+
+    if (isUnderConstruction) {
+      if (elapsedTime > constructionTimeout) {
+        // 如果等待时间超过设定的超时时间
+        const errorMessage = `处理链接超时(${constructionTimeout / 1000}s): ${linksArray[index].href} (索引: ${index})，跳过此元素。`
+        UILogger.logError(errorMessage)
+
+        // 跳过当前元素，处理下一个
+        processElement(index + 1)
+      }
+      else {
+        // 如果还在构建状态，但未超时，则等待一段时间后再次检查
+        UILogger.logInfo(`检测到正在构建状态，已等待 ${elapsedTime / 1000}s，${checkInterval / 1000}秒后将再次检查...`) // 避免频繁打印 info 日志
+
+        setTimeout(() => checkConstructionStatus(index, startTime), checkInterval)
+      }
+    }
+    else {
+      // 如果未处于构建状态
+      UILogger.logInfo('未处于构建状态，点击当前链接。')
+
+      // 点击当前链接
+      linksArray[index].click()
+      UILogger.logInfo(`Clicked link: ${linksArray[index].href}`)
+
+      // 等待设定的间隔时间后，处理下一个元素
+      setTimeout(() => processElement(index + 1), delayBetweenClicks)
+    }
+  }
+
+  // 开始处理第一个元素
+  processElement(0)
 }
 
 /**
