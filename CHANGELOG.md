@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.3.2](https://github.com/Raven-tu/wenku8_dl_ug/compare/v2.3.1...v2.3.2) (2025-05-20)
+
+
+### Features
+
+* 重构下载按钮创建逻辑，优化样式和功能 ([f2896e0](https://github.com/Raven-tu/wenku8_dl_ug/commit/f2896e09e21882fa0e9056f328a612d3fba95467))
+
+
+### Bug Fixes
+
+* 修复 build 时多引入   require 问题 ([7b47d50](https://github.com/Raven-tu/wenku8_dl_ug/commit/7b47d5085b9f81c228e46665ab0451c82d28cb34))
+* 移除创建OPF文档时的调试日志输出 ([07a3d9f](https://github.com/Raven-tu/wenku8_dl_ug/commit/07a3d9f79bf9bd70720a3be18828e8d5fcf08622))
+* 移除进度显示按钮文本更新，简化逻辑 ([08706ac](https://github.com/Raven-tu/wenku8_dl_ug/commit/08706ac04736a77d61a6d55f76bd57d41a925fe0))
+
 ### 2.3.1 (2025-05-20)
 
 
