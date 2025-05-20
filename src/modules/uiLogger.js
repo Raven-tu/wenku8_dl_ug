@@ -85,7 +85,7 @@ export const UILogger = {
       logEntry.innerHTML = `[${time}] ${message}` // Allow HTML in message
       this._progressElements.error.insertBefore(logEntry, this._progressElements.error.firstChild) // Newest on top
       // Limit number of log entries
-      while (this._progressElements.error.children.length > 50) {
+      while (this._progressElements.error.children.length > 300) {
         this._progressElements.error.removeChild(this._progressElements.error.lastChild)
       }
     }
