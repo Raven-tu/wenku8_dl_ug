@@ -67,10 +67,10 @@ function addDownloadButtonsToCatalogPage() {
   const targetCharset = (unsafeWindow.targetEncoding === '1' ? 'big5' : 'utf8') // 假设 targetEncoding "1"是繁体
 
   // 全本下载链接 (网站自带功能)
-  const allTxtLink = document.createElement('a')
-  allTxtLink.href = `https://${DOWNLOAD_DOMAIN}/down.php?type=${targetCharset}&id=${unsafeWindow.article_id}&fname=${encodeURIComponent(bookTitle)}`
-  allTxtLink.textContent = ` 全本文本下载(${targetCharset})`
-  allTxtLink.style.marginLeft = '5px'
+  const txtHref = `https://${DOWNLOAD_DOMAIN}/down.php?type=${targetCharset}&id=${unsafeWindow.article_id}&fname=${encodeURIComponent(bookTitle)}`
+  const txtTitle = `全本文本下载(${targetCharset})`
+  const allTxtLink = createTxtDownloadButton(txtTitle, txtHref)
+
   titleElement.appendChild(allTxtLink)
 
   // 全本ePub下载按钮
@@ -80,16 +80,10 @@ function addDownloadButtonsToCatalogPage() {
   titleElement.appendChild(epubAllEditButton)
 
   // 全本 分卷 ePub下载按钮
-  const aEleSubEpub = document.createElement('a')
+  const aEleSubEpub = createTxtDownloadButton(' 分卷ePub下载(全本)', 'javascript:void(0);',true)
   aEleSubEpub.className = 'DownloadAllSub'
-  aEleSubEpub.textContent = ' 分卷ePub下载(全本)'
-  aEleSubEpub.href = 'javascript:void(0);'
-  aEleSubEpub.style.marginLeft = '5px'
-  aEleSubEpub.style.textDecoration = 'underline' // 样式上更像链接
-  aEleSubEpub.style.color = 'blue' // 样式上更像链接
-
-  titleElement.append(aEleSubEpub)
   aEleSubEpub.addEventListener('click', e => loopDownloadSub())
+  titleElement.append(aEleSubEpub)
 
   // 分卷下载链接和按钮
   document.querySelectorAll('td.vcss').forEach((vcssCell) => { // 修改选择器为 td.vcss
@@ -99,10 +93,10 @@ function addDownloadButtonsToCatalogPage() {
       return
 
     // 分卷文本下载链接 (网站自带功能)
-    const volTxtLink = document.createElement('a')
-    volTxtLink.href = `https://${DOWNLOAD_DOMAIN}/packtxt.php?aid=${unsafeWindow.article_id}&vid=${volumeId}&aname=${encodeURIComponent(bookTitle)}&vname=${encodeURIComponent(volumeName)}&charset=${targetCharset.replace('utf8', 'utf-8')}`
-    volTxtLink.textContent = ` 文本下载(${targetCharset.replace('utf8', 'utf-8')})`
-    volTxtLink.style.marginLeft = '5px'
+    const txtHref = `https://${DOWNLOAD_DOMAIN}/packtxt.php?aid=${unsafeWindow.article_id}&vid=${volumeId}&aname=${encodeURIComponent(bookTitle)}&vname=${encodeURIComponent(volumeName)}&charset=${targetCharset.replace('utf8', 'utf-8')}`
+    const txtTitle = ` 文本下载(${targetCharset.replace('utf8', 'utf-8')})`
+    const volTxtLink = createTxtDownloadButton(txtTitle, txtHref)
+
     vcssCell.appendChild(volTxtLink)
 
     // 分卷ePub下载按钮
@@ -111,6 +105,39 @@ function addDownloadButtonsToCatalogPage() {
     vcssCell.appendChild(epubVolButton)
     vcssCell.appendChild(epubVolEditButton)
   })
+}
+
+/**
+ * 创建文本下载按钮
+ * @param {string} title - 按钮文本
+ * @param {string} href - 按钮链接
+ * @returns {HTMLElement} 创建的按钮元素
+ */
+function createTxtDownloadButton(title, href, otherType = false) {
+  const button = document.createElement('a')
+  button.href = href
+  button.textContent = title
+  button.style.marginLeft = '5px'
+  button.style.display = 'inline-block' // 使元素可以设置 padding 和 border
+  button.style.padding = '5px 10px' // 内边距
+  button.style.textDecoration = 'none' // 移除下划线
+  button.style.borderRadius = '3px' // 圆角
+  button.style.cursor = 'pointer' // 鼠标悬停时显示手型
+  button.style.marginLeft = '5px' // 保留原有外边距
+  button.style.fontSize = '14px' // 设置一个基础字体大小
+  button.style.lineHeight = 'normal' // 确保行高正常
+
+  if (otherType) {
+    button.style.borderColor = '#ffe0b2'; // 柔和的橙色边框
+    button.style.backgroundColor = '#fff8e1'; // 非常浅的橙色背景
+    button.style.color = '#fb602d'; // 柔和的黄色文字
+  } else {
+    button.style.borderColor = '#00bcd4' // 下载全部：青色边框
+    button.style.backgroundColor = '#b2ebf2' // 下载全部：浅青色背景
+    button.style.color = '#0047a7' // 下载全部：深青色文字
+  }
+
+  return button
 }
 
 /**
@@ -124,31 +151,58 @@ function createDownloadButton(text, isEditMode, isDownloadAll) {
   const button = document.createElement('a')
   button.href = 'javascript:void(0);'
   button.textContent = text
-  button.style.marginLeft = '5px'
-  button.style.textDecoration = 'underline' // 样式上更像链接
-  button.style.color = 'blue' // 样式上更像链接
-  button.className = 'ePubSub'
+
+  // 添加模拟按钮的边框
+  button.style.display = 'inline-block' // 使元素可以设置 padding 和 border
+  button.style.padding = '5px 10px' // 内边距
+  button.style.border = '1px solid #ccc' // 边框样式
+  button.style.backgroundColor = '#f0f0f0' // 背景色
+  button.style.color = '#333' // 文字颜色
+  button.style.textDecoration = 'none' // 移除下划线
+  button.style.borderRadius = '3px' // 圆角
+  button.style.cursor = 'pointer' // 鼠标悬停时显示手型
+  button.style.marginLeft = '5px' // 保留原有外边距
+  button.style.fontSize = '14px' // 设置一个基础字体大小
+  button.style.lineHeight = 'normal' // 确保行高正常
+
+  // 根据 different parameters 区分样式
   if (isEditMode) {
-    button.className = ''
-    button.classList.add('EditMode') // 用于编辑器模式隐藏
+    button.style.borderColor = '#ff9800' // 例如，编辑模式使用橙色边框
+    button.style.backgroundColor = '#fff3e0' // 浅橙色背景
+    button.style.color = '#e65100' // 深橙色文字
+    button.className = '' // 清空原有 class
+    button.classList.add('EditMode') // 添加 EditMode class
   }
-  if (isDownloadAll) {
-    button.className = ''
-    button.classList.add('DownloadAll') // 用于编辑器模式隐藏
+  else if (isDownloadAll) { // 假设 isEditMode 和 isDownloadAll 样式不同
+    button.style.borderColor = '#4caf50' // 例如，下载全部使用绿色边框
+    button.style.backgroundColor = '#e8f5e9' // 浅绿色背景
+    button.style.color = '#1b5e20' // 深绿色文字
+    button.className = '' // 清空原有 class
+    button.classList.add('DownloadAll') // 添加 DownloadAll class
   }
+  else {
+    // 默认样式，如果前面条件都不满足，保留初始设置的边框样式
+    button.className = 'ePubSub' // 保留原有 class
+  }
+
   button.addEventListener('click', (event) => {
-    // 禁用按钮，避免重复点击
+    // 禁用按钮，避免重复点击，并改变样式
     event.target.style.pointerEvents = 'none'
-    event.target.style.color = 'gray'
+    event.target.style.opacity = '0.6' // 降低不透明度表示禁用
+    event.target.style.color = '#aaa' // 禁用时文字颜色变浅
+    // 可以选择改变边框和背景色
+    // event.target.style.borderColor = '#ddd';
+    // event.target.style.backgroundColor = '#eee';
 
     const coordinator = new EpubBuilderCoordinator(isEditMode, isDownloadAll)
     coordinator.start(event.target) // 传递事件目标，用于单卷下载时定位
 
     // 按钮在协调器完成或失败后重新启用 (由 EpubFileBuilder.build 处理)
+    // 注意：这里的代码块只负责禁用按钮的样式，实际的 re-enabling 逻辑需要在 EpubBuilderCoordinator 或其调用的方法中实现
   })
+
   return button
 }
-
 /**
  * 循环下载分卷ePub (全本)
  *
