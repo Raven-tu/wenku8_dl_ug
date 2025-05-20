@@ -21,9 +21,9 @@ export default defineConfig({
       entry: 'src/main.js',
       userscript: {
         namespace: Package.name,
-        name:  Package.displayName,
+        name: Package.displayName,
         version: Package.version, // Update version as needed
-        description:  Package.description,
+        description: Package.description,
         author: Package.author,
         icon: 'https://www.wenku8.net/favicon.ico',
         match: ['*://www.wenku8.net/*', '*://www.wenku8.cc/*'],
