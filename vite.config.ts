@@ -1,6 +1,7 @@
 import AutoImport from 'unplugin-auto-import/vite'
 import { defineConfig } from 'vite'
 import monkey, { cdn, util } from 'vite-plugin-monkey'
+import Package from './package.json'
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -19,11 +20,11 @@ export default defineConfig({
     monkey({
       entry: 'src/main.js',
       userscript: {
-        namespace: 'wenku8HaoaRefactored',
-        name: '轻小说文库下载 (优化版)',
-        version: '2.3.0', // Update version as needed
-        description: '优化版：生成分卷和全本ePub文档、ePub文档插图拖放。提升了代码结构、可读性和可维护性。',
-        author: 'HaoaW (Original), raventu (Refactor)',
+        namespace: Package.name,
+        name:  Package.displayName,
+        version: Package.version, // Update version as needed
+        description:  Package.description,
+        author: Package.author,
         icon: 'https://www.wenku8.net/favicon.ico',
         match: ['*://www.wenku8.net/*', '*://www.wenku8.cc/*'],
         require: [

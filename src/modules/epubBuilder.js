@@ -1,5 +1,6 @@
 import { saveAs } from 'file-saver'
 import JSZip from 'jszip'
+import { PROJECT_AUTHOR, PROJECT_NAME, PROJECT_REPO, PROJECT_VERSION } from '../constants'
 
 export const EpubFileBuilder = {
   MIMETYPE: 'application/epub+zip',
@@ -178,11 +179,13 @@ export const EpubFileBuilder = {
                         <dc:identifier id="BookId">urn:uuid:${globalThis.crypto.randomUUID()}</dc:identifier>
                         <dc:creator>${cleanXmlIllegalChars(bookInfo.creator || '未知作者')}</dc:creator>
                         <meta property="dcterms:modified">${`${new Date().toISOString().split('.')[0]}Z`}</meta>
+                        <meta builder="${PROJECT_NAME}" author="${PROJECT_AUTHOR}" version="${PROJECT_VERSION}">${PROJECT_REPO}</meta>
                         ${bookInfo.description ? `<dc:description>${cleanXmlIllegalChars(bookInfo.description)}</dc:description>` : ''}
                     </metadata>
                     <manifest></manifest>
                     <spine></spine>
                 </package>`
+    console.log('创建OPF文档:', opfString)
     const doc = parser.parseFromString(opfString, 'text/xml')
     // 检查解析错误
     const parseError = doc.getElementsByTagName('parsererror')

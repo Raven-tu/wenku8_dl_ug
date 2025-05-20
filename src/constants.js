@@ -1,3 +1,5 @@
+import Package from '../package.json'
+
 export const CURRENT_URL = new URL(unsafeWindow.location.href)
 export const EPUB_EDITOR_CONFIG_UID = '24A08AE1-E132-458C-9E1D-6C998F16A666'
 export const IMG_LOCATION_FILENAME = 'ImgLocation'
@@ -13,3 +15,12 @@ export const XHR_RETRY_DELAY_MS = 500 // XHR重试延迟基础时间
 export const VOLUME_ID_PREFIX = 'Volume' // 分卷文件、DOM ID前缀
 export const IMAGE_FILE_PREFIX = 'Img' // 图片文件、ID前缀
 export const TEXT_SPAN_PREFIX = 'Txt' // 文字ID前缀
+
+// project constants
+export const PROJECT_NAME = Package.name
+export const PROJECT_DISPLAYNAME = Package.displayName
+export const PROJECT_AUTHOR = Package.author
+export const PROJECT_VERSION = Package.version
+export const PROJECT_REPO = Package.repository.url
+// description
+export const PROJECT_DESCRIPTION = Package.description

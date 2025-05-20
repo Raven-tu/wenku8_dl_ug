@@ -1,8 +1,15 @@
 {
   "name": "wenku8_dl_ug",
+  "displayName": "轻小说文库下载 (优化版)",
   "type": "module",
-  "version": "0.0.1",
+  "version": "2.3.0",
+  "author": "HaoaW (Original) raventu (Refactor)",
   "private": true,
+  "description": "wenku8_dl_ug is a userscript for downloading Wenku8 novels. wenku8 下载器, 支持批量下载、EPUB格式转换、简繁体转换等功能。",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Raven-tu/wenku8_dl_ug"
+  },
   "scripts": {
     "build": "tsc && vite build",
     "dev": "vite",

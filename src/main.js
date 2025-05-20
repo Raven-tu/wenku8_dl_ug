@@ -1,18 +1,13 @@
 // ==UserScript==
 // @name         轻小说文库下载 (优化版)
-// @namespace    wenku8HaoaRefactored
-// @version      2.3.0
-// @description  优化版：生成分卷和全本ePub文档、ePub文档插图拖放、部分小说的在线阅读。提升了代码结构、可读性和可维护性。
-// @author       HaoaW (Original), GeminiPro (Refactor)
+// @namespace    wenku8HaoaWRefactored
+// @author       HaoaW (Original), raventu (Refactor)
 // @match        *://www.wenku8.net/*
 // @match        *://www.wenku8.cc/*
-// @connect      wenku8.com
-// @connect      777743.xyz
 // @require      https://cdn.jsdelivr.net/npm/opencc-js@1.0.5/dist/umd/full.js
 // @require      https://cdn.jsdelivr.net/npm/jszip@2.6.1/dist/jszip.js
 // @require      https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.js
 // @icon         https://www.wenku8.net/favicon.ico
-// @grant        GM_xmlhttpRequest
 // ==/UserScript==
 
 /**
