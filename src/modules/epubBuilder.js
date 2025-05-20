@@ -185,7 +185,6 @@ export const EpubFileBuilder = {
                     <manifest></manifest>
                     <spine></spine>
                 </package>`
-    console.log('创建OPF文档:', opfString)
     const doc = parser.parseFromString(opfString, 'text/xml')
     // 检查解析错误
     const parseError = doc.getElementsByTagName('parsererror')
