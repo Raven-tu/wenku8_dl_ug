@@ -1,23 +1,47 @@
+import AutoImport from 'unplugin-auto-import/vite'
 import { defineConfig } from 'vite'
 import monkey, { cdn, util } from 'vite-plugin-monkey'
-import AutoImport from 'unplugin-auto-import/vite'
 
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
     AutoImport({
-      imports: [util.unimportPreset],
+      dts: 'src/auto-imports.d.ts',
+      imports: [
+        util.unimportPreset,
+      ],
+      dirs: [
+        'src/modules/**',
+        'src/coordinator/**',
+        'src/constants.js',
+      ],
     }),
     monkey({
-      entry: 'src/main.ts',
+      entry: 'src/main.js',
       userscript: {
+        namespace: 'wenku8HaoaRefactored',
+        name: '轻小说文库下载 (优化版)',
+        version: '2.3.0', // Update version as needed
+        description: '优化版：生成分卷和全本ePub文档、ePub文档插图拖放。提升了代码结构、可读性和可维护性。',
+        author: 'haoa wang (Original), raventu (Refactor)',
         icon: 'https://www.wenku8.net/favicon.ico',
-        namespace: 'wenku8Haoa',
         match: ['*://www.wenku8.net/*', '*://www.wenku8.cc/*'],
         require: [
-          // 'https://cdn.jsdelivr.net/npm/opencc-js@1.0.5/dist/umd/full.js',
-          // 'https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js',
-          // 'https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js',
+          'https://cdn.jsdelivr.net/npm/opencc-js@1.0.5/dist/umd/full.js',
+          'https://cdn.jsdelivr.net/npm/jszip@2.6.1/dist/jszip.js',
+          'https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.js',
+        ],
+        connect: [
+          'wenku8.com', // For book info, reviews
+          'wenku8.cc', // For book info, reviews
+          'app.wenku8.com', // App API
+          'dl.wenku8.com', // Text downloads
+          'img.wenku8.com', // Image downloads
+        ],
+        grant: [
+          'GM_xmlhttpRequest',
+          'GM_info',
+          'unsafeWindow',
         ],
       },
       server: {
@@ -26,11 +50,11 @@ export default defineConfig({
       build: {
         externalGlobals: {
           // @require      https://cdn.jsdelivr.net/npm/opencc-js@1.0.5/dist/umd/full.js
-          // @require      https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js
-          // @require      https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js
-          'OpenCC': cdn.jsdelivr('opencc-js', 'umd/full.js'),
-          'JSZip': cdn.jsdelivr('jszip', 'dist/jszip.min.js'),
-          'file-saver': cdn.jsdelivr('file-saver', 'dist/FileSaver.min.js'),
+          // @require      https://cdn.jsdelivr.net/npm/jszip@2.6.1/dist/jszip.js
+          // @require      https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.js
+          'jszip': cdn.jsdelivr('JSZip', 'dist/jszip.min.js'),
+          'file-saver': cdn.jsdelivr('FileSaver', 'dist/FileSaver.min.js'),
+          'opencc-js': cdn.jsdelivr('OpenCC', 'dist/umd/full.js'), // 注意这里的全局变量名和路径
         },
       },
     }),

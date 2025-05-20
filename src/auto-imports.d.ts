@@ -6,15 +6,15 @@
 // biome-ignore lint: disable
 export {}
 declare global {
-  const APP_API_DOMAIN: typeof import('./src/constants.js')['APP_API_DOMAIN']
-  const APP_API_PATH: typeof import('./src/constants.js')['APP_API_PATH']
-  const AppApiService: typeof import('./src/modules/appApiService.js')['AppApiService']
-  const CURRENT_URL: typeof import('./src/constants.js')['CURRENT_URL']
-  const DOWNLOAD_DOMAIN: typeof import('./src/constants.js')['DOWNLOAD_DOMAIN']
-  const EPUB_EDITOR_CONFIG_UID: typeof import('./src/constants.js')['EPUB_EDITOR_CONFIG_UID']
-  const EpubBuilderCoordinator: typeof import('./src/coordinator/epubBuilderCoordinator.js')['EpubBuilderCoordinator']
-  const EpubEditor: typeof import('./src/modules/epubEditor.js')['EpubEditor']
-  const EpubFileBuilder: typeof import('./src/modules/epubBuilder.js')['EpubFileBuilder']
+  const APP_API_DOMAIN: typeof import('./constants.js')['APP_API_DOMAIN']
+  const APP_API_PATH: typeof import('./constants.js')['APP_API_PATH']
+  const AppApiService: typeof import('./modules/appApiService.js')['AppApiService']
+  const CURRENT_URL: typeof import('./constants.js')['CURRENT_URL']
+  const DOWNLOAD_DOMAIN: typeof import('./constants.js')['DOWNLOAD_DOMAIN']
+  const EPUB_EDITOR_CONFIG_UID: typeof import('./constants.js')['EPUB_EDITOR_CONFIG_UID']
+  const EpubBuilderCoordinator: typeof import('./coordinator/epubBuilderCoordinator.js')['EpubBuilderCoordinator']
+  const EpubEditor: typeof import('./modules/epubEditor.js')['EpubEditor']
+  const EpubFileBuilder: typeof import('./modules/epubBuilder.js')['EpubFileBuilder']
   const GM: typeof import('vite-plugin-monkey/dist/client')['GM']
   const GM_addElement: typeof import('vite-plugin-monkey/dist/client')['GM_addElement']
   const GM_addStyle: typeof import('vite-plugin-monkey/dist/client')['GM_addStyle']
@@ -43,28 +43,28 @@ declare global {
   const GM_unregisterMenuCommand: typeof import('vite-plugin-monkey/dist/client')['GM_unregisterMenuCommand']
   const GM_webRequest: typeof import('vite-plugin-monkey/dist/client')['GM_webRequest']
   const GM_xmlhttpRequest: typeof import('vite-plugin-monkey/dist/client')['GM_xmlhttpRequest']
-  const IMAGE_DOMAIN: typeof import('./src/constants.js')['IMAGE_DOMAIN']
-  const IMAGE_FILE_PREFIX: typeof import('./src/constants.js')['IMAGE_FILE_PREFIX']
-  const IMG_LOCATION_FILENAME: typeof import('./src/constants.js')['IMG_LOCATION_FILENAME']
-  const MAX_XHR_RETRIES: typeof import('./src/constants.js')['MAX_XHR_RETRIES']
-  const OpenCCConverter: typeof import('./src/modules/opencc.js')['OpenCCConverter']
-  const TEXT_SPAN_PREFIX: typeof import('./src/constants.js')['TEXT_SPAN_PREFIX']
-  const UILogger: typeof import('./src/modules/uiLogger.js')['UILogger']
-  const VOLUME_ID_PREFIX: typeof import('./src/constants.js')['VOLUME_ID_PREFIX']
-  const VolumeLoader: typeof import('./src/modules/volumeLoader.js')['VolumeLoader']
-  const XHRDownloadManager: typeof import('./src/modules/xhrManager.js')['XHRDownloadManager']
-  const XHR_RETRY_DELAY_MS: typeof import('./src/constants.js')['XHR_RETRY_DELAY_MS']
-  const XHR_TIMEOUT_MS: typeof import('./src/constants.js')['XHR_TIMEOUT_MS']
-  const XML_ILLEGAL_CHARACTERS_REGEX: typeof import('./src/constants.js')['XML_ILLEGAL_CHARACTERS_REGEX']
-  const cleanXmlIllegalChars: typeof import('./src/modules/utils.js')['cleanXmlIllegalChars']
-  const fetchAsText: typeof import('./src/modules/utils.js')['fetchAsText']
-  const gmXmlHttpRequestAsync: typeof import('./src/modules/utils.js')['gmXmlHttpRequestAsync']
+  const IMAGE_DOMAIN: typeof import('./constants.js')['IMAGE_DOMAIN']
+  const IMAGE_FILE_PREFIX: typeof import('./constants.js')['IMAGE_FILE_PREFIX']
+  const IMG_LOCATION_FILENAME: typeof import('./constants.js')['IMG_LOCATION_FILENAME']
+  const MAX_XHR_RETRIES: typeof import('./constants.js')['MAX_XHR_RETRIES']
+  const OpenCCConverter: typeof import('./modules/opencc.js')['OpenCCConverter']
+  const TEXT_SPAN_PREFIX: typeof import('./constants.js')['TEXT_SPAN_PREFIX']
+  const UILogger: typeof import('./modules/uiLogger.js')['UILogger']
+  const VOLUME_ID_PREFIX: typeof import('./constants.js')['VOLUME_ID_PREFIX']
+  const VolumeLoader: typeof import('./modules/volumeLoader.js')['VolumeLoader']
+  const XHRDownloadManager: typeof import('./modules/xhrManager.js')['XHRDownloadManager']
+  const XHR_RETRY_DELAY_MS: typeof import('./constants.js')['XHR_RETRY_DELAY_MS']
+  const XHR_TIMEOUT_MS: typeof import('./constants.js')['XHR_TIMEOUT_MS']
+  const XML_ILLEGAL_CHARACTERS_REGEX: typeof import('./constants.js')['XML_ILLEGAL_CHARACTERS_REGEX']
+  const cleanXmlIllegalChars: typeof import('./modules/utils.js')['cleanXmlIllegalChars']
+  const fetchAsText: typeof import('./modules/utils.js')['fetchAsText']
+  const gmXmlHttpRequestAsync: typeof import('./modules/utils.js')['gmXmlHttpRequestAsync']
   const monkeyWindow: typeof import('vite-plugin-monkey/dist/client')['monkeyWindow']
   const unsafeWindow: typeof import('vite-plugin-monkey/dist/client')['unsafeWindow']
 }
 // for type re-export
 declare global {
   // @ts-ignore
-  export type { EpubBuilderCoordinator } from './src/coordinator/epubBuilderCoordinator.js'
-  import('./src/coordinator/epubBuilderCoordinator.js')
+  export type { EpubBuilderCoordinator } from './coordinator/epubBuilderCoordinator.js'
+  import('./coordinator/epubBuilderCoordinator.js')
 }
