@@ -23,7 +23,7 @@ export default defineConfig({
         name: '轻小说文库下载 (优化版)',
         version: '2.3.0', // Update version as needed
         description: '优化版：生成分卷和全本ePub文档、ePub文档插图拖放。提升了代码结构、可读性和可维护性。',
-        author: 'haoa wang (Original), raventu (Refactor)',
+        author: 'HaoaW (Original), raventu (Refactor)',
         icon: 'https://www.wenku8.net/favicon.ico',
         match: ['*://www.wenku8.net/*', '*://www.wenku8.cc/*'],
         require: [
@@ -54,7 +54,7 @@ export default defineConfig({
           // @require      https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.js
           'jszip': cdn.jsdelivr('JSZip', 'dist/jszip.min.js'),
           'file-saver': cdn.jsdelivr('FileSaver', 'dist/FileSaver.min.js'),
-          'opencc-js': cdn.jsdelivr('OpenCC', 'dist/umd/full.js'), // 注意这里的全局变量名和路径
+          'opencc-js': cdn.jsdelivr('OpenCC', 'dist/umd/full.js'),
         },
       },
     }),
