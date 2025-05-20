@@ -70,7 +70,6 @@ export const UILogger = {
   showProgress() {
     this._progressElements.main.style.display = 'block'
     this._showButton.style.display = 'none'
-    document.getElementById('toggleProgress').textContent = '隐藏'
   },
 
   // updateProgress needs access to the bookInfo instance for counts
