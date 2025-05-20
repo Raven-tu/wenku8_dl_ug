@@ -1,5 +1,5 @@
-import { saveAs } from 'file-saver'
 import JSZip from 'jszip'
+import { saveAs } from '../../lib/FileSaver.js'
 import { PROJECT_AUTHOR, PROJECT_NAME, PROJECT_REPO, PROJECT_VERSION } from '../constants'
 
 export const EpubFileBuilder = {
@@ -139,7 +139,7 @@ export const EpubFileBuilder = {
     epubFileName = epubFileName.replace(/[\\/:*?"<>|]/g, '_') // 清理文件名
 
     try {
-      const blob = await zip.generateAsync({ type: 'blob', mimeType: 'application/epub+zip' })
+      const blob = await zip.generate({ type: 'blob', mimeType: 'application/epub+zip' })
       saveAs(blob, `${epubFileName}.epub`)
       bookInfo.refreshProgress(bookInfo, `<span style="color:green;">ePub生成完成, 文件名：${epubFileName}.epub</span>`)
     }

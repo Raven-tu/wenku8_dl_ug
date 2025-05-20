@@ -51,7 +51,7 @@ export default defineConfig({
       build: {
         externalGlobals: {
           'jszip': ['JSZip', 'https://cdn.jsdelivr.net/npm/jszip@2.6.1/dist/jszip.min.js'],
-          'file-saver': ['FileSaver', 'https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js'],
+          // 'file-saver': ['FileSaver', 'https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js'],
           'opencc-js': ['OpenCC', 'https://cdn.jsdelivr.net/npm/opencc-js@1.0.5/dist/umd/full.js'],
         },
       },

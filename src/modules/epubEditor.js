@@ -486,7 +486,7 @@ export const EpubEditor = {
   /**
    * 将配置发送到书评区
    */
-  _sendConfigToServer() {
+  async _sendConfigToServer() {
     const cfgToSend = { ...this.config } // 浅拷贝
     const imgLocJson = JSON.stringify(this._bookInfoInstance.ImgLocation)
 
@@ -496,50 +496,51 @@ export const EpubEditor = {
       compressionOptions: { level: 9 },
     })
 
-    zip.generateAsync({ type: 'base64', mimeType: 'application/zip' })
-      .then((base64Data) => {
-        cfgToSend.ImgLocationBase64 = base64Data
-        delete cfgToSend.ImgLocation // 移除原始数组
+    try {
+      const base64Data = await zip.generate({ type: 'base64', mimeType: 'application/zip' })
 
-        const uniqueVolumeNames = [...new Set(
-          this._bookInfoInstance.ImgLocation
-            .map(loc => this._bookInfoInstance.nav_toc.find(toc => toc.vid === loc.vid))
-            .filter(Boolean)
-            .map(toc => toc.volumeName),
-        )]
+      cfgToSend.ImgLocationBase64 = base64Data
+      delete cfgToSend.ImgLocation // 移除原始数组
 
-        const postContent = `包含分卷列表：${uniqueVolumeNames.join(', ')}\n[code]${JSON.stringify(cfgToSend)}[/code]`
-        const postData = new Map([
-          ['ptitle', 'ePub插图位置 (优化版脚本)'],
-          ['pcontent', postContent],
-        ])
-        const postUrl = `/modules/article/reviews.php?aid=${this._bookInfoInstance.aid}`
+      const uniqueVolumeNames = [...new Set(
+        this._bookInfoInstance.ImgLocation
+          .map(loc => this._bookInfoInstance.nav_toc.find(toc => toc.vid === loc.vid))
+          .filter(Boolean)
+          .map(toc => toc.volumeName),
+      )]
 
-        // 使用 iframe post 提交 (简单实现，不处理响应)
-        const iframe = document.createElement('iframe')
-        iframe.style.display = 'none'
-        document.body.appendChild(iframe)
-        const iframeDoc = iframe.contentWindow.document
-        const form = iframeDoc.createElement('form')
-        form.acceptCharset = 'gbk' // 网站编码
-        form.method = 'POST'
-        form.action = postUrl
-        postData.forEach((value, key) => {
-          const input = iframeDoc.createElement('input')
-          input.type = 'hidden' // 或 "text"
-          input.name = key
-          input.value = value
-          form.appendChild(input)
-        })
-        iframeDoc.body.appendChild(form)
-        form.submit()
-        setTimeout(() => iframe.remove(), 5000) // 5秒后移除iframe
-        this._bookInfoInstance.logger.logInfo('插图配置已尝试发送到书评区。')
+      const postContent = `包含分卷列表：${uniqueVolumeNames.join(', ')}\n[code]${JSON.stringify(cfgToSend)}[/code]`
+      const postData = new Map([
+        ['ptitle', 'ePub插图位置 (优化版脚本)'],
+        ['pcontent', postContent],
+      ])
+      const postUrl = `/modules/article/reviews.php?aid=${this._bookInfoInstance.aid}`
+
+      // 使用 iframe post 提交 (简单实现，不处理响应)
+      const iframe = document.createElement('iframe')
+      iframe.style.display = 'none'
+      document.body.appendChild(iframe)
+      const iframeDoc = iframe.contentWindow.document
+      const form = iframeDoc.createElement('form')
+      form.acceptCharset = 'gbk' // 网站编码
+      form.method = 'POST'
+      form.action = postUrl
+      postData.forEach((value, key) => {
+        const input = iframeDoc.createElement('input')
+        input.type = 'hidden' // 或 "text"
+        input.name = key
+        input.value = value
+        form.appendChild(input)
       })
-      .catch((err) => {
-        this._bookInfoInstance.logger.logError(`压缩配置失败，无法发送到书评区: ${err.message}`)
-        console.error('Zip config error:', err)
-      })
+      iframeDoc.body.appendChild(form)
+      form.submit()
+      setTimeout(() => iframe.remove(), 5000) // 5秒后移除iframe
+      this._bookInfoInstance.logger.logInfo('插图配置已尝试发送到书评区。')
+    }
+    catch (error) {
+      this._bookInfoInstance.logger.logError(`压缩配置失败，无法发送到书评区: ${err.message}`)
+      console.error('Zip config error:', err)
+    }
   },
 
   /**
