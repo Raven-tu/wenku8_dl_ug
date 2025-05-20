@@ -5,6 +5,12 @@
 - 作者 HaoaWang
   - 项目地址 [轻小说文库下载](https://greasyfork.org/zh-CN/scripts/407369-%E8%BD%BB%E5%B0%8F%E8%AF%B4%E6%96%87%E5%BA%93%E4%B8%8B%E8%BD%BD)
 
+## 重构内容
+
+- 生成分卷和全本ePub文档
+- ePub文档插图拖放
+- 提升了代码结构、可读性和可维护性。
+
 ## 目录结构
 
 ```md
