@@ -4,8 +4,11 @@ wenku8_dl_ug 是一个功能强大的用户脚本，专为从轻小说文库 (We
 
 ## 项目链接
 
-* **Greasy Fork (原作者 HaoaWang):** [轻小说文库下载](https://greasyfork.org/zh-CN/scripts/407369-%E8%BD%BB%E5%B0%8F%E8%AF%B4%E6%96%87%E5%BA%93%E4%B8%8B%E8%BD%BD)
-* **GitHub (重构版):** [Raven-tu/wenku8_dl_ug](https://github.com/Raven-tu/wenku8_dl_ug)
+* **原作者 HaoaWang:**
+  * [Greasy Fork](https://greasyfork.org/zh-CN/scripts/407369-%E8%BD%BB%E5%B0%8F%E8%AF%B4%E6%96%87%E5%BA%93%E4%B8%8B%E8%BD%BD)
+* **重构版:**
+  * [Github](https://github.com/Raven-tu/wenku8_dl_ug)
+  * [Greasy Fork](https://greasyfork.org/zh-CN/scripts/536585-%E8%BD%BB%E5%B0%8F%E8%AF%B4%E6%96%87%E5%BA%93%E4%B8%8B%E8%BD%BD-%E4%BC%98%E5%8C%96%E7%89%88)
 
 ## 主要特性
 
