@@ -1,3 +1,4 @@
+// @ts-nocheck
 import JSZip from 'jszip'
 import { saveAs } from '../../lib/FileSaver.js'
 import { PROJECT_AUTHOR, PROJECT_NAME, PROJECT_REPO, PROJECT_VERSION } from '../constants'

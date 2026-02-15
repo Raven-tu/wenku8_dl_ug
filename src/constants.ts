@@ -1,5 +1,18 @@
 import Package from '../package.json'
 
+interface PackageInfo {
+  name: string
+  displayName: string
+  author: string
+  version: string
+  repository: {
+    url: string
+  }
+  description: string
+}
+
+const packageInfo = Package as PackageInfo
+
 export const CURRENT_URL = new URL(unsafeWindow.location.href)
 export const EPUB_EDITOR_CONFIG_UID = '24A08AE1-E132-458C-9E1D-6C998F16A666'
 export const IMG_LOCATION_FILENAME = 'ImgLocation'
@@ -17,10 +30,10 @@ export const IMAGE_FILE_PREFIX = 'Img' // 图片文件、ID前缀
 export const TEXT_SPAN_PREFIX = 'Txt' // 文字ID前缀
 
 // project constants
-export const PROJECT_NAME = Package.name
-export const PROJECT_DISPLAYNAME = Package.displayName
-export const PROJECT_AUTHOR = Package.author
-export const PROJECT_VERSION = Package.version
-export const PROJECT_REPO = Package.repository.url
+export const PROJECT_NAME = packageInfo.name
+export const PROJECT_DISPLAYNAME = packageInfo.displayName
+export const PROJECT_AUTHOR = packageInfo.author
+export const PROJECT_VERSION = packageInfo.version
+export const PROJECT_REPO = packageInfo.repository.url
 // description
-export const PROJECT_DESCRIPTION = Package.description
+export const PROJECT_DESCRIPTION = packageInfo.description

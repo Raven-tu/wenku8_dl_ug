@@ -14,11 +14,11 @@ export default defineConfig({
       dirs: [
         'src/modules/**',
         'src/coordinator/**',
-        'src/constants.js',
+        'src/constants.ts',
       ],
     }),
     monkey({
-      entry: 'src/main.js',
+      entry: 'src/main.ts',
       userscript: {
         namespace: Package.name,
         name: Package.displayName,
@@ -51,7 +51,7 @@ export default defineConfig({
       },
       build: {
         externalGlobals: {
-          'jszip': ['JSZip', 'https://cdn.jsdelivr.net/npm/jszip@2.6.1/dist/jszip.min.js'],
+          jszip: ['JSZip', 'https://cdn.jsdelivr.net/npm/jszip@2.6.1/dist/jszip.min.js'],
           // 'file-saver': ['FileSaver', 'https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js'],
         },
       },

@@ -1,6 +1,17 @@
+import type { BookInfoLike, ImageEntry, TextEntry } from '../types'
+
+interface ProgressElements {
+  text: HTMLSpanElement
+  image: HTMLSpanElement
+  error: HTMLDivElement
+  main: HTMLDivElement
+  controls: HTMLDivElement
+}
+
 export const UILogger = {
-  _progressElements: null, // DOM elements for progress display
-  _showButton: null, // Button to show the progress bar after closing
+  _progressElements: null as ProgressElements | null, // DOM elements for progress display
+  _showButton: null as HTMLButtonElement | null, // Button to show the progress bar after closing
+  _bookInfoInstance: null as BookInfoLike | null,
 
   init() {
     if (this._progressElements)
@@ -53,7 +64,7 @@ export const UILogger = {
     this._showButton.addEventListener('click', () => this.showProgress())
 
     this.clearLog() // Initial state
-    this.updateProgress({ Text: [], Images: [], totalTasksAdded: 0, tasksCompletedOrSkipped: 0 }, 'ePub下载器就绪...') // Initial status
+    this.updateProgress(this.getMinimalBookInfo(), 'ePub下载器就绪...') // Initial status
   },
 
   _ensureInitialized() {
@@ -63,18 +74,24 @@ export const UILogger = {
   },
 
   closeProgress() {
+    if (!this._progressElements || !this._showButton)
+      return
     this._progressElements.main.style.display = 'none'
     this._showButton.style.display = 'block'
   },
 
   showProgress() {
+    if (!this._progressElements || !this._showButton)
+      return
     this._progressElements.main.style.display = 'block'
     this._showButton.style.display = 'none'
   },
 
   // updateProgress needs access to the bookInfo instance for counts
-  updateProgress(bookInfoInstance, message) {
+  updateProgress(bookInfoInstance: BookInfoLike, message?: string) {
     this._ensureInitialized()
+    if (!this._progressElements)
+      return
 
     // Add new message as a log entry
     if (message) {
@@ -84,7 +101,7 @@ export const UILogger = {
       logEntry.innerHTML = `[${time}] ${message}` // Allow HTML in message
       this._progressElements.error.insertBefore(logEntry, this._progressElements.error.firstChild) // Newest on top
       // Limit number of log entries
-      while (this._progressElements.error.children.length > 300) {
+      while (this._progressElements.error.children.length > 300 && this._progressElements.error.lastChild) {
         this._progressElements.error.removeChild(this._progressElements.error.lastChild)
       }
     }
@@ -111,7 +128,7 @@ export const UILogger = {
     this._progressElements.main.appendChild(this._progressElements.controls) // Re-append controls
 
     if (this._progressElements.error.firstChild) {
-      const latestLogClone = this._progressElements.error.firstChild.cloneNode(true)
+      const latestLogClone = this._progressElements.error.firstChild.cloneNode(true) as HTMLElement
       latestLogClone.style.display = 'inline' // Display inline with the text
       latestLogClone.style.fontWeight = 'bold' // Make it stand out
       this._progressElements.main.appendChild(latestLogClone)
@@ -124,26 +141,28 @@ export const UILogger = {
     }
   },
 
-  logError(message) {
+  logError(message: string) {
     this._ensureInitialized()
     console.error(`[UILogger] ${message}`) // Also log to console
     this.updateProgress(this.getMinimalBookInfo(), `<span style="color:red;">错误: ${message}</span>`)
   },
 
-  logWarn(message) {
+  logWarn(message: string) {
     this._ensureInitialized()
     console.warn(`[UILogger] ${message}`)
     this.updateProgress(this.getMinimalBookInfo(), `<span style="color:orange;">警告: ${message}</span>`)
   },
 
-  logInfo(message) {
+  logInfo(message: string, ...extra: unknown[]) {
     this._ensureInitialized()
-    console.log(`[UILogger] ${message}`)
+    console.log(`[UILogger] ${message}`, ...extra)
     this.updateProgress(this.getMinimalBookInfo(), `<span style="color:green;">${message}</span>`) // Use green for general info
   },
 
   clearLog() {
     this._ensureInitialized()
+    if (!this._progressElements)
+      return
     this._progressElements.error.innerHTML = '' // Clear error/log area
     // Reset counts in the main display
     this._progressElements.main.innerHTML = 'ePub生成进度: 文本 0/0；图片 0/0；任务 0/0；<br>最新日志: 无'
@@ -153,12 +172,31 @@ export const UILogger = {
     }
   },
 
-  getMinimalBookInfo() {
+  getMinimalBookInfo(): BookInfoLike {
     return this._bookInfoInstance || {
-      Text: [],
-      Images: [],
+      aid: '',
+      title: '',
+      creator: '',
+      description: '',
+      targetEncoding: '',
+      nav_toc: [],
+      Text: [] as TextEntry[],
+      Images: [] as ImageEntry[],
+      ImgLocation: [],
+      logger: this,
+      XHRManager: {
+        init: () => {},
+        hasCriticalFailure: false,
+        taskFinished: () => {},
+        retryTask: () => {},
+        add: () => {},
+        areAllTasksDone: () => true,
+      },
       totalTasksAdded: 0,
       tasksCompletedOrSkipped: 0,
+      XHRFail: false,
+      refreshProgress: () => {},
+      tryBuildEpub: () => {},
     }
   },
 }

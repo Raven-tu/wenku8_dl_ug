@@ -1,12 +1,20 @@
+import type { BookInfoLike, XhrTask } from '../types'
+
+function getErrorMessage(err: unknown): string {
+  if (err instanceof Error)
+    return err.message
+  return String(err)
+}
+
 export const XHRDownloadManager = {
-  _XHRArr: [], // 下载请求列表
-  _XHRLimitArr: [], // 仅对 app 接口限速的请求队列
+  _XHRArr: [] as XhrTask[], // 下载请求列表
+  _XHRLimitArr: [] as XhrTask[], // 仅对 app 接口限速的请求队列
   _XHRDelay: 60 * 1000 / 100, // 限制每60秒100个请求
-  _XHRIntervalID: null, // 限速请求发送计时器
-  _bookInfoInstance: null, // 关联的EpubBuilder实例
+  _XHRIntervalID: null as ReturnType<typeof setInterval> | null, // 限速请求发送计时器
+  _bookInfoInstance: null as BookInfoLike | null, // 关联的EpubBuilder实例
   hasCriticalFailure: false, // 标记是否有关键下载失败
 
-  init(bookInfoInstance) {
+  init(bookInfoInstance: BookInfoLike) {
     this._bookInfoInstance = bookInfoInstance
     this._XHRArr = []
     this._XHRLimitArr = []
@@ -26,7 +34,9 @@ export const XHRDownloadManager = {
    *   - type: 任务类型 (用于日志和判断关键性)
    *   - isCritical: 是否为关键任务 (默认为true，图片等非关键任务可设为false)
    */
-  add(xhrTask) {
+  add(xhrTask: XhrTask) {
+    if (!this._bookInfoInstance)
+      return
     if (this.hasCriticalFailure) {
       this._bookInfoInstance.logger.logWarn(`关键下载已失败，新任务 ${xhrTask.type || xhrTask.url} 被跳过。`)
       // 标记任务为“完成”（实际上是跳过）以允许流程继续判断
@@ -44,7 +54,10 @@ export const XHRDownloadManager = {
     this._XHRLoad(xhrTask)
   },
 
-  _XHRLoad(xhrTask) {
+  _XHRLoad(xhrTask: XhrTask) {
+    if (!this._bookInfoInstance)
+      return
+    const bookInfo = this._bookInfoInstance
     const taskName = xhrTask.type || xhrTask.url
     if (xhrTask.url && xhrTask.url.endsWith('/android.php')) {
       if (this._XHRIntervalID === null) {
@@ -55,37 +68,44 @@ export const XHRDownloadManager = {
     }
 
     try {
+      if (!xhrTask.loadFun)
+        return
       const maybePromise = xhrTask.loadFun(xhrTask)
       if (maybePromise && typeof maybePromise.then === 'function') {
-        maybePromise.catch((err) => {
-          this._bookInfoInstance.logger.logError(`任务 ${taskName} 执行时发生意外错误: ${err?.message || err}`)
+        maybePromise.catch((err: unknown) => {
+          bookInfo.logger.logError(`任务 ${taskName} 执行时发生意外错误: ${getErrorMessage(err)}`)
           this.retryTask(xhrTask, `${taskName} 下载失败`) // 未被内部捕获时按原逻辑重试
         })
       }
     }
-    catch (err) {
-      this._bookInfoInstance.logger.logError(`任务 ${taskName} 执行时发生意外错误: ${err?.message || err}`)
+    catch (err: unknown) {
+      bookInfo.logger.logError(`任务 ${taskName} 执行时发生意外错误: ${getErrorMessage(err)}`)
       this.retryTask(xhrTask, `${taskName} 下载失败`)
     }
   },
 
   _XHRLimitLoad() {
+    if (!this._bookInfoInstance)
+      return
+    const bookInfo = this._bookInfoInstance
     const xhrTask = this._XHRLimitArr.shift()
     if (!xhrTask)
       return
 
     const taskName = xhrTask.type || xhrTask.url
     try {
+      if (!xhrTask.loadFun)
+        return
       const maybePromise = xhrTask.loadFun(xhrTask)
       if (maybePromise && typeof maybePromise.then === 'function') {
-        maybePromise.catch((err) => {
-          this._bookInfoInstance.logger.logError(`任务 ${taskName} 执行时发生意外错误: ${err?.message || err}`)
+        maybePromise.catch((err: unknown) => {
+          bookInfo.logger.logError(`任务 ${taskName} 执行时发生意外错误: ${getErrorMessage(err)}`)
           this.retryTask(xhrTask, `${taskName} 下载失败`)
         })
       }
     }
-    catch (err) {
-      this._bookInfoInstance.logger.logError(`任务 ${taskName} 执行时发生意外错误: ${err?.message || err}`)
+    catch (err: unknown) {
+      bookInfo.logger.logError(`任务 ${taskName} 执行时发生意外错误: ${getErrorMessage(err)}`)
       this.retryTask(xhrTask, `${taskName} 下载失败`)
     }
   },
@@ -95,7 +115,9 @@ export const XHRDownloadManager = {
    * @param {object} task - 完成的任务对象
    * @param {boolean} [isFinalFailure] - 任务是否最终失败
    */
-  taskFinished(task, isFinalFailure = false) {
+  taskFinished(task: XhrTask, isFinalFailure = false) {
+    if (!this._bookInfoInstance)
+      return
     // 确保不会重复标记完成
     if (task._finished)
       return
@@ -127,7 +149,9 @@ export const XHRDownloadManager = {
    * @param {object} xhrTask - 需要重试的任务对象
    * @param {string} message - 重试原因消息
    */
-  retryTask(xhrTask, message) {
+  retryTask(xhrTask: XhrTask, message: string) {
+    if (!this._bookInfoInstance)
+      return
     if (this.hasCriticalFailure) {
       this._bookInfoInstance.logger.logWarn(`重试 ${xhrTask.type || xhrTask.url} 被跳过，因为关键下载已失败。`)
       return
@@ -140,9 +164,10 @@ export const XHRDownloadManager = {
     }
     else {
       this._bookInfoInstance.refreshProgress(this._bookInfoInstance, `<span style="color:red;">${xhrTask.type || xhrTask.url} 超出最大重试次数, 下载失败！</span>`)
-      this.hasCriticalFailure = xhrTask.isCritical
-      this._bookInfoInstance.XHRFail = xhrTask.isCritical
-      this.taskFinished(xhrTask, xhrTask.isCritical) // 标记为失败，并检查是否关键
+      const isCritical = Boolean(xhrTask.isCritical)
+      this.hasCriticalFailure = isCritical
+      this._bookInfoInstance.XHRFail = isCritical
+      this.taskFinished(xhrTask, isCritical) // 标记为失败，并检查是否关键
     }
   },
 

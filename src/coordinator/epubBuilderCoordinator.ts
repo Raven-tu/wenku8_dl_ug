@@ -1,4 +1,28 @@
+import type { BookInfoLike, ImageEntry, ImgLocationItem, NavTocEntry, TextEntry, XhrManagerLike, XhrTask } from '../types'
+
 export class EpubBuilderCoordinator {
+  aid: string
+  title: string
+  creator: string
+  description: string
+  bookUrl: string
+  targetEncoding: string
+  nav_toc: NavTocEntry[]
+  Text: TextEntry[]
+  Images: ImageEntry[]
+  ImgLocation: ImgLocationItem[]
+  ePubEidt: boolean
+  ePubEidtDone: boolean
+  descriptionXhrInitiated: boolean
+  thumbnailImageAdded: boolean
+  isDownloadAll: boolean
+  XHRManager: XhrManagerLike
+  logger: typeof UILogger
+  totalTasksAdded: number
+  tasksCompletedOrSkipped: number
+  XHRFail: boolean
+  VOLUME_ID_PREFIX: string
+
   /**
    * @param {boolean} isEditingMode - 是否进入编辑模式
    * @param {boolean} downloadAllVolumes - 是否下载全部分卷
@@ -10,7 +34,7 @@ export class EpubBuilderCoordinator {
     this.creator = document.getElementById('info')?.textContent?.trim() || '未知作者'
     this.description = '' // 将由 VolumeLoader.loadBookDescription 填充
     this.bookUrl = CURRENT_URL.href
-    this.targetEncoding = unsafeWindow.targetEncoding // 页面原始目标编码 "1"繁体 "2"简体
+    this.targetEncoding = unsafeWindow.targetEncoding ?? '' // 页面原始目标编码 "1"繁体 "2"简体
 
     // 数据存储
     this.nav_toc = [] // 导航菜单 {volumeName, vid, volumeID, volumeHref, chapterArr}
@@ -44,7 +68,7 @@ export class EpubBuilderCoordinator {
    * 启动下载和构建流程
    * @param {HTMLElement} eventTarget - 触发下载的DOM元素 (用于单卷下载时定位)
    */
-  start(eventTarget) {
+  start(eventTarget: HTMLElement) {
     this.logger.clearLog() // 开始时清空日志
     this.refreshProgress(this, '开始处理书籍...')
 
@@ -52,14 +76,16 @@ export class EpubBuilderCoordinator {
     this._loadExternalImageConfigs()
 
     // 2. 确定要下载的卷
-    const volumeElements = this.isDownloadAll
+    const rawVolumeElements = this.isDownloadAll
       ? Array.from(document.querySelectorAll('.vcss'))
       : [eventTarget.closest('td.vcss')] // 假设按钮在td.vcss内部或就是它
 
-    if (volumeElements.some(el => !el)) {
+    const volumeElements = rawVolumeElements.filter((element): element is Element => Boolean(element))
+
+    if (rawVolumeElements.some(el => !el)) {
       this.logger.logError('未能确定下载目标分卷，请检查页面结构。')
       // 重新启用生成按钮 (如果存在)
-      const buildBtn = document.getElementById('EidterBuildBtn')
+      const buildBtn = document.getElementById('EidterBuildBtn') as HTMLButtonElement | null
       if (buildBtn)
         buildBtn.disabled = false
       return
@@ -106,7 +132,7 @@ export class EpubBuilderCoordinator {
       this.XHRManager.add({
         type: 'webVolume', // 自定义类型
         url: downloadUrl,
-        loadFun: xhr => VolumeLoader.loadWebVolumeText(xhr), // 使用VolumeLoader的方法
+        loadFun: async (xhr: XhrTask) => VolumeLoader.loadWebVolumeText(xhr), // 使用VolumeLoader的方法
         VolumeIndex: index, // 用于在回调中定位nav_toc和Text中的条目
         data: { vid: volumePageId, vcssText: volumeName, Text: textEntry }, // 传递给处理函数的信息
         bookInfo: this, // 传递EpubBuilderCoordinator实例
@@ -117,7 +143,7 @@ export class EpubBuilderCoordinator {
     if (this.Text.length === 0) {
       this.refreshProgress(this, '没有有效的分卷被添加到下载队列。')
       // 重新启用生成按钮 (如果存在)
-      const buildBtn = document.getElementById('EidterBuildBtn')
+      const buildBtn = document.getElementById('EidterBuildBtn') as HTMLButtonElement | null
       if (buildBtn)
         buildBtn.disabled = false
       return
@@ -135,7 +161,7 @@ export class EpubBuilderCoordinator {
     // 这个方法可能不再需要，或者仅用于调试
     // this.tasksCompletedOrSkipped++;
     // this.tryBuildEpub();
-    new Promise((resolve) => {
+    new Promise<void>((resolve) => {
       // 延迟 1 秒，便于观察进度
       setTimeout(() => {
         resolve()
@@ -153,7 +179,7 @@ export class EpubBuilderCoordinator {
   tryBuildEpub() {
     // EpubFileBuilder.build 内部会检查 XHRManager 的状态
     EpubFileBuilder.build(this)
-      .then((result) => {
+      .then((result: unknown) => {
         // 构建遇到问题或没有准备好则跳过
         if (!result || this.XHRFail) {
           return
@@ -162,7 +188,7 @@ export class EpubBuilderCoordinator {
         this.refreshProgress(this, 'ePub文件已成功生成。')
         this.logger.logInfo('ePub文件已成功生成。', result)
         // 重新启用生成按钮 (如果存在)
-        const buildBtn = document.getElementById('EidterBuildBtn')
+        const buildBtn = document.getElementById('EidterBuildBtn') as HTMLButtonElement | null
         if (buildBtn)
           buildBtn.disabled = false
       })
@@ -176,7 +202,7 @@ export class EpubBuilderCoordinator {
    * @param {EpubBuilderCoordinator} instance - 协调器实例 (通常是 this)
    * @param {string} [message] - 日志消息
    */
-  refreshProgress(instance, message) {
+  refreshProgress(instance: BookInfoLike, message?: string) {
     this.logger.updateProgress(instance, message)
   }
 
@@ -191,11 +217,11 @@ export class EpubBuilderCoordinator {
         if (cfg.UID === EPUB_EDITOR_CONFIG_UID
           && cfg.aid === this.aid // 比较时注意类型
           && Array.isArray(cfg.ImgLocation) && cfg.ImgLocation.length > 0) {
-          cfg.ImgLocation.forEach((loc) => {
+          cfg.ImgLocation.forEach((loc: ImgLocationItem) => {
             // 简单校验，确保vid, spanID, imgID都存在
             if (loc.vid && loc.spanID && loc.imgID) {
               // 避免重复添加
-              if (!this.ImgLocation.some(existing =>
+              if (!this.ImgLocation.some((existing: ImgLocationItem) =>
                 existing.vid === loc.vid && existing.spanID === loc.spanID && existing.imgID === loc.imgID,
               )) {
                 this.ImgLocation.push({

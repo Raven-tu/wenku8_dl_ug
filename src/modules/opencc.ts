@@ -1,17 +1,19 @@
+type PageGlobals = Window
+
 export const OpenCCConverter = {
   COOKIE_KEY: 'OpenCCwenku8',
   TARGET_ENCODING_COOKIE_KEY: 'targetEncodingCookie', // 假设页面脚本定义了这个key
   COOKIE_DAYS: 7,
-  buttonElement: null,
+  buttonElement: null as HTMLAnchorElement | null,
   isConversionEnabled: false,
-  originalSimplized: null,
-  originalTraditionalized: null,
+  originalSimplized: null as ((text: string) => string) | null | undefined,
+  originalTraditionalized: null as ((text: string) => string) | null | undefined,
 
   /**
    * 初始化 OpenCC 转换功能
    * @param {object} pageGlobals - 包含页面全局变量的对象 (如 unsafeWindow)
    */
-  init(pageGlobals) {
+  init(pageGlobals: PageGlobals) {
     // 尝试获取页面已有的简繁转换函数和状态变量
     this.originalSimplized = pageGlobals.Simplized
     this.originalTraditionalized = pageGlobals.Traditionalized
@@ -55,7 +57,7 @@ export const OpenCCConverter = {
     }
   },
 
-  toggleConversion(pageGlobals) {
+  toggleConversion(pageGlobals: PageGlobals) {
     if (this.isConversionEnabled) {
       this.setCookie(this.COOKIE_KEY, '', this.COOKIE_DAYS, pageGlobals) // 关闭
     }
@@ -67,11 +69,13 @@ export const OpenCCConverter = {
   },
 
   updateButtonText() {
-    this.buttonElement.innerHTML = this.isConversionEnabled ? '关闭(OpenCC)' : '开启(OpenCC)'
+    if (this.buttonElement) {
+      this.buttonElement.innerHTML = this.isConversionEnabled ? '关闭(OpenCC)' : '开启(OpenCC)'
+    }
   },
 
   // 保持与旧代码一致的 setCookie 和 getCookie (可能由页面提供)
-  setCookie(name, value, days, pageGlobals) {
+  setCookie(name: string, value: string, days: number, pageGlobals: PageGlobals) {
     if (typeof pageGlobals.setCookie === 'function') {
       pageGlobals.setCookie(name, value, days)
     }
@@ -87,7 +91,7 @@ export const OpenCCConverter = {
     }
   },
 
-  getCookie(name, pageGlobals) {
+  getCookie(name: string, pageGlobals: PageGlobals): string | null {
     if (typeof pageGlobals.getCookie === 'function') {
       return pageGlobals.getCookie(name)
     }

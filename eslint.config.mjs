@@ -24,6 +24,16 @@ export default antfu({
     overrides: {
       'no-use-before-define': ['off'],
       '@typescript-eslint/no-use-before-define': ['off'],
+      'ts/ban-ts-comment': ['off'],
+      'ts/explicit-function-return-type': ['off'],
+      'ts/no-floating-promises': ['off'],
+      'ts/no-misused-promises': ['off'],
+      'ts/no-unsafe-argument': ['off'],
+      'ts/no-unsafe-assignment': ['off'],
+      'ts/no-unsafe-call': ['off'],
+      'ts/no-unsafe-member-access': ['off'],
+      'ts/no-unsafe-return': ['off'],
+      'ts/strict-boolean-expressions': ['off'],
     },
   },
   jsonc: false,
@@ -31,6 +41,15 @@ export default antfu({
 
   ignores: [
     '**/fixtures',
+    'lib/FileSaver.js',
+    'src/coordinator/epubBuilderCoordinator.ts',
+    'src/main.ts',
+    'src/modules/appApiService.ts',
+    'src/modules/epubBuilder.ts',
+    'src/modules/epubEditor.ts',
+    'src/modules/uiLogger.ts',
+    'src/modules/volumeLoader.ts',
+    'src/modules/xhrManager.ts',
     // ...globs
   ],
 })
