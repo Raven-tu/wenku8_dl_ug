@@ -2,6 +2,7 @@ export const AppApiService = {
   volumeChapterData: new Map(), // 存储卷的章节列表 { vid: [{cid, cName, content}]}
   chapterListXml: null, // 缓存书籍的章节列表XML Document
   isChapterListLoading: false,
+  chapterListTaskAdded: false,
   chapterListWaitQueue: [], // 等待章节列表的请求xhr包装对象
   disableTraditionalChineseRequest: true, // 默认禁用APP接口请求繁体，由前端OpenCC处理
 
@@ -21,10 +22,11 @@ export const AppApiService = {
 
   /**
    * 从App接口获取书籍章节列表XML
-   * @param {EpubBuilderCoordinator} bookInfo - 协调器实例
+   * @param {object} xhrTask - 章节目录任务对象
    * @returns {Promise<void>}
    */
-  async _fetchChapterList(bookInfo) {
+  async _fetchChapterList(xhrTask) {
+    const { bookInfo } = xhrTask
     if (this.isChapterListLoading)
       return // 避免重复请求
 
@@ -38,9 +40,11 @@ export const AppApiService = {
       const response = await gmXmlHttpRequestAsync({
         method: 'POST',
         url,
-        headers: { 'content-type': 'application/x-www-form-urlencoded;charset=utf-8' },
+        headers: {
+          'content-type': 'application/x-www-form-urlencoded;charset=utf-8',
+          'User-Agent': 'Android',
+        },
         data: requestBody,
-        timeout: XHR_TIMEOUT_MS,
       })
 
       if (response.status === 200) {
@@ -48,9 +52,12 @@ export const AppApiService = {
         // 清理非法XML字符
         this.chapterListXml = parser.parseFromString(cleanXmlIllegalChars(response.responseText), 'application/xml')
         bookInfo.refreshProgress(bookInfo, `App章节目录下载完成。`)
+        this.chapterListTaskAdded = false
+        bookInfo.XHRManager.taskFinished(xhrTask, false)
         // 处理等待队列
-        this.chapterListWaitQueue.forEach(queuedXhr => this.loadVolumeChapters(queuedXhr))
+        const waitQueue = this.chapterListWaitQueue.slice()
         this.chapterListWaitQueue = []
+        waitQueue.forEach(queuedXhr => this.loadVolumeChapters(queuedXhr))
       }
       else {
         throw new Error(`Status ${response.status}`)
@@ -58,8 +65,7 @@ export const AppApiService = {
     }
     catch (error) {
       bookInfo.logger.logError(`App章节目录下载失败: ${error.message}`)
-      // 标记关键任务失败，并通知XHRManager
-      bookInfo.XHRManager.taskFinished({ type: 'appChapterList', isCritical: true }, true)
+      bookInfo.XHRManager.retryTask(xhrTask, 'App章节目录下载失败，重新下载')
     }
     finally {
       this.isChapterListLoading = false
@@ -78,9 +84,18 @@ export const AppApiService = {
 
     if (!this.chapterListXml) {
       // 如果章节列表还在加载或未加载，加入等待队列
-      this.chapterListWaitQueue.push(xhrVolumeRequest)
-      if (!this.isChapterListLoading) {
-        this._fetchChapterList(bookInfo) // 触发下载章节列表
+      if (!this.chapterListWaitQueue.includes(xhrVolumeRequest)) {
+        this.chapterListWaitQueue.push(xhrVolumeRequest)
+      }
+      if (!this.chapterListTaskAdded) {
+        this.chapterListTaskAdded = true
+        bookInfo.XHRManager.add({
+          type: 'appChapterList',
+          url: `http://${APP_API_DOMAIN}${APP_API_PATH}`,
+          loadFun: xhr => this._fetchChapterList(xhr),
+          bookInfo,
+          isCritical: true,
+        })
       }
       return
     }
@@ -137,9 +152,11 @@ export const AppApiService = {
       const response = await gmXmlHttpRequestAsync({
         method: 'POST',
         url: xhrChapterRequest.url,
-        headers: { 'content-type': 'application/x-www-form-urlencoded;charset=utf-8' },
+        headers: {
+          'content-type': 'application/x-www-form-urlencoded;charset=utf-8',
+          'User-Agent': 'Android',
+        },
         data: requestBody,
-        timeout: XHR_TIMEOUT_MS,
       })
 
       if (response.status === 200) {
@@ -206,9 +223,11 @@ export const AppApiService = {
       const response = await gmXmlHttpRequestAsync({
         method: 'POST',
         url,
-        headers: { 'content-type': 'application/x-www-form-urlencoded;charset=utf-8' },
+        headers: {
+          'content-type': 'application/x-www-form-urlencoded;charset=utf-8',
+          'User-Agent': 'Android',
+        },
         data: requestBody,
-        timeout: XHR_TIMEOUT_MS,
       })
 
       if (response.status === 200) {

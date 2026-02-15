@@ -1,14 +1,19 @@
 export const XHRDownloadManager = {
-  _queue: [],
-  _activeDownloads: 0,
-  _maxConcurrentDownloads: 4, // 并发下载数控制
+  _XHRArr: [], // 下载请求列表
+  _XHRLimitArr: [], // 仅对 app 接口限速的请求队列
+  _XHRDelay: 60 * 1000 / 100, // 限制每60秒100个请求
+  _XHRIntervalID: null, // 限速请求发送计时器
   _bookInfoInstance: null, // 关联的EpubBuilder实例
   hasCriticalFailure: false, // 标记是否有关键下载失败
 
   init(bookInfoInstance) {
     this._bookInfoInstance = bookInfoInstance
-    this._queue = []
-    this._activeDownloads = 0
+    this._XHRArr = []
+    this._XHRLimitArr = []
+    if (this._XHRIntervalID) {
+      clearInterval(this._XHRIntervalID)
+      this._XHRIntervalID = null
+    }
     this.hasCriticalFailure = false
   },
 
@@ -30,35 +35,58 @@ export const XHRDownloadManager = {
       this._bookInfoInstance.tryBuildEpub() // 尝试推进构建流程
       return
     }
+    xhrTask.start = xhrTask.start ?? false
+    xhrTask.done = xhrTask.done ?? false
     xhrTask.XHRRetryCount = 0
     xhrTask.isCritical = xhrTask.isCritical !== undefined ? xhrTask.isCritical : true // 默认是关键任务
-    this._queue.push(xhrTask)
+    this._XHRArr.push(xhrTask)
     this._bookInfoInstance.totalTasksAdded++
-    this._processQueue()
+    this._XHRLoad(xhrTask)
   },
 
-  _processQueue() {
-    if (this.hasCriticalFailure)
+  _XHRLoad(xhrTask) {
+    const taskName = xhrTask.type || xhrTask.url
+    if (xhrTask.url && xhrTask.url.endsWith('/android.php')) {
+      if (this._XHRIntervalID === null) {
+        this._XHRIntervalID = setInterval(() => this._XHRLimitLoad(), this._XHRDelay)
+      }
+      this._XHRLimitArr.push(xhrTask)
+      return
+    }
+
+    try {
+      const maybePromise = xhrTask.loadFun(xhrTask)
+      if (maybePromise && typeof maybePromise.then === 'function') {
+        maybePromise.catch((err) => {
+          this._bookInfoInstance.logger.logError(`任务 ${taskName} 执行时发生意外错误: ${err?.message || err}`)
+          this.retryTask(xhrTask, `${taskName} 下载失败`) // 未被内部捕获时按原逻辑重试
+        })
+      }
+    }
+    catch (err) {
+      this._bookInfoInstance.logger.logError(`任务 ${taskName} 执行时发生意外错误: ${err?.message || err}`)
+      this.retryTask(xhrTask, `${taskName} 下载失败`)
+    }
+  },
+
+  _XHRLimitLoad() {
+    const xhrTask = this._XHRLimitArr.shift()
+    if (!xhrTask)
       return
 
-    while (this._activeDownloads < this._maxConcurrentDownloads && this._queue.length > 0) {
-      const task = this._queue.shift()
-      this._activeDownloads++
-      // 异步执行任务
-      task.loadFun(task)
-        .then(() => {
-          // loadFun 内部应标记 task.done = true 并调用 taskFinished
-          // 如果 loadFun 没有正确处理，这里可能会有问题。
-          // 更好的做法是 loadFun 返回一个 Promise，并在 Promise resolve/reject 时调用 taskFinished
-          // 为了兼容现有结构，假设 loadFun 最终会调用 taskFinished 或抛出错误
+    const taskName = xhrTask.type || xhrTask.url
+    try {
+      const maybePromise = xhrTask.loadFun(xhrTask)
+      if (maybePromise && typeof maybePromise.then === 'function') {
+        maybePromise.catch((err) => {
+          this._bookInfoInstance.logger.logError(`任务 ${taskName} 执行时发生意外错误: ${err?.message || err}`)
+          this.retryTask(xhrTask, `${taskName} 下载失败`)
         })
-        .catch((err) => {
-          // loadFun 内部应该处理自己的错误和重试逻辑
-          // 如果 loadFun 抛出未捕获的错误，这里记录并视为最终失败
-          this._bookInfoInstance.logger.logError(`任务 ${task.type || task.url} 执行时发生意外错误: ${err}`)
-          task.done = true // 标记意外失败
-          this.taskFinished(task, task.isCritical) // 标记为失败，并检查是否关键
-        })
+      }
+    }
+    catch (err) {
+      this._bookInfoInstance.logger.logError(`任务 ${taskName} 执行时发生意外错误: ${err?.message || err}`)
+      this.retryTask(xhrTask, `${taskName} 下载失败`)
     }
   },
 
@@ -72,18 +100,25 @@ export const XHRDownloadManager = {
     if (task._finished)
       return
     task._finished = true
+    task.done = true
 
-    this._activeDownloads--
     this._bookInfoInstance.tasksCompletedOrSkipped++
 
     if (isFinalFailure && task.isCritical && !this.hasCriticalFailure) {
       this.hasCriticalFailure = true
       this._bookInfoInstance.XHRFail = true // 同步到 bookInfo
       this._bookInfoInstance.logger.logError('一个关键下载任务最终失败，后续部分任务可能被取消。')
-      this._queue = [] // 清空等待队列
+      this._XHRLimitArr = [] // 清空等待队列
+      if (this._XHRIntervalID) {
+        clearInterval(this._XHRIntervalID)
+        this._XHRIntervalID = null
+      }
     }
 
-    this._processQueue() // 尝试处理下一个任务
+    if (this._XHRArr.every(e => e.done) && this._XHRIntervalID) {
+      clearInterval(this._XHRIntervalID)
+      this._XHRIntervalID = null
+    }
     this._bookInfoInstance.tryBuildEpub() // 通知EpubBuilder检查是否所有任务完成
   },
 
@@ -95,23 +130,18 @@ export const XHRDownloadManager = {
   retryTask(xhrTask, message) {
     if (this.hasCriticalFailure) {
       this._bookInfoInstance.logger.logWarn(`重试 ${xhrTask.type || xhrTask.url} 被跳过，因为关键下载已失败。`)
-      xhrTask.done = true // 标记为完成（跳过）
-      this.taskFinished(xhrTask, true) // 标记为关键失败
       return
     }
 
     xhrTask.XHRRetryCount = (xhrTask.XHRRetryCount || 0) + 1
     if (xhrTask.XHRRetryCount <= MAX_XHR_RETRIES) {
       this._bookInfoInstance.refreshProgress(this._bookInfoInstance, `${message} (尝试次数 ${xhrTask.XHRRetryCount}/${MAX_XHR_RETRIES})`)
-      // 将任务重新放回队列头部，稍后重试
-      this._activeDownloads-- // 先减少计数，因为它即将重新入队
-      this._queue.unshift(xhrTask)
-      // 延迟一小段时间再处理队列，避免立即重试导致服务器压力
-      setTimeout(() => this._processQueue(), XHR_RETRY_DELAY_MS * xhrTask.XHRRetryCount)
+      setTimeout(() => this._XHRLoad(xhrTask), XHR_RETRY_DELAY_MS * xhrTask.XHRRetryCount)
     }
     else {
       this._bookInfoInstance.refreshProgress(this._bookInfoInstance, `<span style="color:red;">${xhrTask.type || xhrTask.url} 超出最大重试次数, 下载失败！</span>`)
-      xhrTask.done = true // 标记为最终失败
+      this.hasCriticalFailure = xhrTask.isCritical
+      this._bookInfoInstance.XHRFail = xhrTask.isCritical
       this.taskFinished(xhrTask, xhrTask.isCritical) // 标记为失败，并检查是否关键
     }
   },
@@ -121,7 +151,11 @@ export const XHRDownloadManager = {
    * @returns {boolean}
    */
   areAllTasksDone() {
-    // 只有当添加的任务总数等于已完成/跳过的任务数，且队列为空，且没有正在进行的下载时，才算全部完成
-    return this._bookInfoInstance.tasksCompletedOrSkipped >= this._bookInfoInstance.totalTasksAdded && this._queue.length === 0 && this._activeDownloads === 0
+    const allDone = this._XHRArr.every(e => e.done)
+    if (allDone && this._XHRIntervalID) {
+      clearInterval(this._XHRIntervalID)
+      this._XHRIntervalID = null
+    }
+    return allDone
   },
 }

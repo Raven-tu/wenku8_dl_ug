@@ -38,6 +38,8 @@ export default defineConfig({
           'app.wenku8.com', // App API
           'dl.wenku8.com', // Text downloads
           'img.wenku8.com', // Image downloads
+          '777743.xyz', // Alternate image host root
+          'pic.777743.xyz', // Alternate image host
         ],
         grant: [
           'GM_xmlhttpRequest',

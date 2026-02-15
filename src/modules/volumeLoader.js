@@ -13,7 +13,7 @@ export const VolumeLoader = {
     const failureMessage = `${volumeInfo.volumeName} 下载失败`
 
     try {
-      const response = await gmXmlHttpRequestAsync({ method: 'GET', url, timeout: XHR_TIMEOUT_MS })
+      const response = await gmXmlHttpRequestAsync({ method: 'GET', url })
       if (response.status === 200) {
         bookInfo.refreshProgress(bookInfo, `${volumeInfo.volumeName} 网页版内容下载完成。`)
         this.dealVolumeText(xhr, response.responseText) // 处理文本
@@ -78,7 +78,7 @@ export const VolumeLoader = {
     const failureMessage = `${imageInfo.idName} 下载失败`
 
     try {
-      const response = await gmXmlHttpRequestAsync({ method: 'GET', url, responseType: 'arraybuffer', timeout: XHR_TIMEOUT_MS })
+      const response = await gmXmlHttpRequestAsync({ method: 'GET', url, responseType: 'arraybuffer' })
       if (response.status === 200) {
         imageInfo.content = response.response
 
@@ -89,7 +89,7 @@ export const VolumeLoader = {
             imageInfo.ObjectURL = URL.createObjectURL(imageInfo.Blob)
             const img = new Image()
             img.onload = () => {
-              imageInfo.coverImg = (img.naturalHeight / img.naturalWidth > 1.2) // 封面高宽比检查
+              imageInfo.coverImg = (img.naturalHeight / img.naturalWidth > 1) // 封面高宽比检查
               URL.revokeObjectURL(imageInfo.ObjectURL) // 释放
               delete imageInfo.Blob // 清理
               delete imageInfo.ObjectURL
