@@ -128,8 +128,8 @@ wenku8_dl_ug/
 
 ### 如何贡献
 
-1. **报告 Bug**: 使用 [Bug 报告模板](https://github.com/Raven-tu/wenku8_dl_ug/issues/new?template=bug_report.md) 报告问题
-2. **建议功能**: 使用 [功能请求模板](https://github.com/Raven-tu/wenku8_dl_ug/issues/new?template=feature_request.md) 提出新想法
+1. **报告 Bug**: 使用 [Bug 报告模板](https://github.com/Raven-tu/wenku8_dl_ug/issues/new/choose) 报告问题
+2. **建议功能**: 使用 [功能请求模板](https://github.com/Raven-tu/wenku8_dl_ug/issues/new/choose) 提出新想法
 3. **提交代码**: 查看我们的 [贡献指南](CONTRIBUTING.md) 了解详细的开发流程
 
 ### 快速开始

@@ -208,8 +208,8 @@ Before submitting a PR, please ensure:
 
 ### 报告 Bug / Reporting Bugs
 
-使用 [Bug 报告模板](.github/ISSUE_TEMPLATE/bug_report.md) 报告问题时，请包括：
-When reporting bugs using the [Bug Report template](.github/ISSUE_TEMPLATE/bug_report.md), please include:
+使用 [Bug 报告模板](https://github.com/Raven-tu/wenku8_dl_ug/issues/new/choose) 报告问题时，请包括：
+When reporting bugs using the [Bug Report template](https://github.com/Raven-tu/wenku8_dl_ug/issues/new/choose), please include:
 
 - 清晰的问题描述
 - 重现步骤
@@ -220,8 +220,8 @@ When reporting bugs using the [Bug Report template](.github/ISSUE_TEMPLATE/bug_r
 
 ### 功能请求 / Feature Requests
 
-使用 [功能请求模板](.github/ISSUE_TEMPLATE/feature_request.md) 提出新功能时，请说明：
-When suggesting features using the [Feature Request template](.github/ISSUE_TEMPLATE/feature_request.md), please describe:
+使用 [功能请求模板](https://github.com/Raven-tu/wenku8_dl_ug/issues/new/choose) 提出新功能时，请说明：
+When suggesting features using the [Feature Request template](https://github.com/Raven-tu/wenku8_dl_ug/issues/new/choose), please describe:
 
 - 功能的目的和价值
 - 使用场景
