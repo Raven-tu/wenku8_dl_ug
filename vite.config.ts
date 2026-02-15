@@ -28,7 +28,6 @@ export default defineConfig({
         icon: 'https://www.wenku8.net/favicon.ico',
         match: ['*://www.wenku8.net/*', '*://www.wenku8.cc/*'],
         require: [
-          'https://cdn.jsdelivr.net/npm/opencc-js@1.0.5/dist/umd/full.js',
           // 'https://cdn.jsdelivr.net/npm/jszip@2.6.1/dist/jszip.min.js',  // add on build
           // 'https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js', // add on build
         ],
@@ -54,7 +53,6 @@ export default defineConfig({
         externalGlobals: {
           'jszip': ['JSZip', 'https://cdn.jsdelivr.net/npm/jszip@2.6.1/dist/jszip.min.js'],
           // 'file-saver': ['FileSaver', 'https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js'],
-          'opencc-js': ['OpenCC', 'https://cdn.jsdelivr.net/npm/opencc-js@1.0.5/dist/umd/full.js'],
         },
       },
     }),

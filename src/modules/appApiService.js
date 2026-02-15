@@ -4,7 +4,7 @@ export const AppApiService = {
   isChapterListLoading: false,
   chapterListTaskAdded: false,
   chapterListWaitQueue: [], // 等待章节列表的请求xhr包装对象
-  disableTraditionalChineseRequest: true, // 默认禁用APP接口请求繁体，由前端OpenCC处理
+  disableTraditionalChineseRequest: true, // 默认请求简体，避免额外的简繁转换耦合
 
   _getApiLanguageParam(bookInfo) {
     // 使用 bookInfo 中的 targetEncoding，如果不存在则回退到页面全局变量

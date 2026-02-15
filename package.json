@@ -22,11 +22,9 @@
   },
   "devDependencies": {
     "@antfu/eslint-config": "^7.4.3",
-    "@types/opencc-js": "^1.0.3",
     "eslint": "^10.0.0",
     "file-saver": "^2.0.5",
     "jszip": "2.6.1",
-    "opencc-js": "^1.0.5",
     "standard-version": "^9.5.0",
     "typescript": "^5.9.3",
     "unplugin-auto-import": "^21.0.0",

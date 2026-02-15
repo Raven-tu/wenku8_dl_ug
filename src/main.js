@@ -4,7 +4,6 @@
 // @author       HaoaW (Original), raventu (Refactor)
 // @match        *://www.wenku8.net/*
 // @match        *://www.wenku8.cc/*
-// @require      https://cdn.jsdelivr.net/npm/opencc-js@1.0.5/dist/umd/full.js
 // @require      https://cdn.jsdelivr.net/npm/jszip@2.6.1/dist/jszip.js
 // @require      https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.js
 // @icon         https://www.wenku8.net/favicon.ico
@@ -14,15 +13,6 @@
  * 初始化用户脚本功能
  */
 function initializeUserScript() {
-  // 优先使用OpenCC进行简繁转换
-  // 检查 OpenCC 是否已加载，以及页面是否提供了必要的全局变量
-  if (typeof unsafeWindow.OpenCC !== 'undefined' && typeof unsafeWindow.translateButtonId !== 'undefined') {
-    OpenCCConverter.init(unsafeWindow) // 传递 unsafeWindow
-  }
-  else {
-    console.warn('OpenCC或页面翻译环境未准备好，增强的简繁转换未初始化。')
-  }
-
   // 页面变量检查 (这些变量由wenku8页面自身定义)
   if (typeof unsafeWindow.article_id === 'undefined') {
     console.log('非书籍或目录页面，脚本主要功能不激活。')
