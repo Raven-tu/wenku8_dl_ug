@@ -21,16 +21,16 @@
     "release-patch": "standard-version --release-as patch"
   },
   "devDependencies": {
-    "@antfu/eslint-config": "^4.13.1",
+    "@antfu/eslint-config": "^7.4.3",
     "@types/opencc-js": "^1.0.3",
-    "eslint": "^9.27.0",
+    "eslint": "^10.0.0",
     "file-saver": "^2.0.5",
     "jszip": "2.6.1",
     "opencc-js": "^1.0.5",
     "standard-version": "^9.5.0",
-    "typescript": "^5.8.3",
-    "unplugin-auto-import": "^19.2.0",
-    "vite": "^6.3.5",
-    "vite-plugin-monkey": "^5.0.8"
+    "typescript": "^5.9.3",
+    "unplugin-auto-import": "^21.0.0",
+    "vite": "^7.3.1",
+    "vite-plugin-monkey": "^7.1.9"
   }
 }
