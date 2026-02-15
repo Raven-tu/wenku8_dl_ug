@@ -31,6 +31,10 @@ export default antfu({
 
   ignores: [
     '**/fixtures',
+    'lib/**',
+    '.github/**',
+    'dist/**',
+    'node_modules/**',
     // ...globs
   ],
 })

@@ -1,0 +1,11 @@
+blank_issues_enabled: true
+contact_links:
+  - name: 💬 讨论区 / Discussions
+    url: https://github.com/Raven-tu/wenku8_dl_ug/discussions
+    about: 如果您有问题或想法，可以在讨论区发帖 / Post in Discussions if you have questions or ideas
+  - name: 📖 文档 / Documentation
+    url: https://github.com/Raven-tu/wenku8_dl_ug/blob/main/readme.md
+    about: 查看项目文档和使用说明 / View project documentation and usage instructions
+  - name: 🤝 贡献指南 / Contributing Guide
+    url: https://github.com/Raven-tu/wenku8_dl_ug/blob/main/CONTRIBUTING.md
+    about: 了解如何为项目做出贡献 / Learn how to contribute to the project

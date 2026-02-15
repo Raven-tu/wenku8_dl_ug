@@ -124,7 +124,34 @@ wenku8_dl_ug/
 
 ## 贡献
 
-欢迎提交 Pull Requests 或报告 Issues 来改进此项目。
+欢迎提交 Pull Requests 或报告 Issues 来改进此项目！我们非常感谢社区的贡献。
+
+### 如何贡献
+
+1. **报告 Bug**: 使用 [Bug 报告模板](https://github.com/Raven-tu/wenku8_dl_ug/issues/new?template=bug_report.md) 报告问题
+2. **建议功能**: 使用 [功能请求模板](https://github.com/Raven-tu/wenku8_dl_ug/issues/new?template=feature_request.md) 提出新想法
+3. **提交代码**: 查看我们的 [贡献指南](CONTRIBUTING.md) 了解详细的开发流程
+
+### 快速开始
+
+```bash
+# Fork 并克隆仓库
+git clone https://github.com/YOUR_USERNAME/wenku8_dl_ug.git
+
+# 安装依赖
+pnpm install
+
+# 启动开发服务器
+pnpm dev
+
+# 运行 lint 检查
+pnpm lint
+
+# 构建项目
+pnpm build
+```
+
+更多详细信息，请参阅 [CONTRIBUTING.md](CONTRIBUTING.md)。
 
 ## 致谢
 
