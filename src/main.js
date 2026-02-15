@@ -395,7 +395,12 @@ async function loadConfigFromUrlIfPresent() {
         if (parsedConfig.ImgLocationBase64) {
           try {
             const zip = new JSZip()
-            await zip.load(parsedConfig.ImgLocationBase64, { base64: true })
+            if (typeof zip.loadAsync === 'function') {
+              await zip.loadAsync(parsedConfig.ImgLocationBase64, { base64: true })
+            }
+            else {
+              await zip.load(parsedConfig.ImgLocationBase64, { base64: true })
+            }
             const imgLocFile = zip.file(IMG_LOCATION_FILENAME)
             if (imgLocFile) {
               const imgLocJson = await imgLocFile.async('string')

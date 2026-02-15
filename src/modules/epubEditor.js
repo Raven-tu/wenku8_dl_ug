@@ -497,7 +497,9 @@ export const EpubEditor = {
     })
 
     try {
-      const base64Data = await zip.generate({ type: 'base64', mimeType: 'application/zip' })
+      const base64Data = typeof zip.generateAsync === 'function'
+        ? await zip.generateAsync({ type: 'base64', mimeType: 'application/zip' })
+        : await zip.generate({ type: 'base64', mimeType: 'application/zip' })
 
       cfgToSend.ImgLocationBase64 = base64Data
       delete cfgToSend.ImgLocation // 移除原始数组
@@ -538,8 +540,8 @@ export const EpubEditor = {
       this._bookInfoInstance.logger.logInfo('插图配置已尝试发送到书评区。')
     }
     catch (error) {
-      this._bookInfoInstance.logger.logError(`压缩配置失败，无法发送到书评区: ${err.message}`)
-      console.error('Zip config error:', err)
+      this._bookInfoInstance.logger.logError(`压缩配置失败，无法发送到书评区: ${error.message}`)
+      console.error('Zip config error:', error)
     }
   },
 

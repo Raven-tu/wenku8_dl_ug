@@ -139,7 +139,9 @@ export const EpubFileBuilder = {
     epubFileName = epubFileName.replace(/[\\/:*?"<>|]/g, '_') // 清理文件名
 
     try {
-      const blob = await zip.generate({ type: 'blob', mimeType: 'application/epub+zip' })
+      const blob = typeof zip.generateAsync === 'function'
+        ? await zip.generateAsync({ type: 'blob', mimeType: 'application/epub+zip' })
+        : await zip.generate({ type: 'blob', mimeType: 'application/epub+zip' })
       saveAs(blob, `${epubFileName}.epub`)
       bookInfo.refreshProgress(bookInfo, `<span style="color:green;">ePub生成完成, 文件名：${epubFileName}.epub</span>`)
     }
