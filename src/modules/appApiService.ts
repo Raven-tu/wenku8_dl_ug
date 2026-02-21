@@ -15,6 +15,13 @@ interface VolumeTaskData {
   isAppApi?: boolean
 }
 
+function toVolumeTaskData(input: unknown): VolumeTaskData {
+  if (!input || typeof input !== 'object') {
+    return { vid: '' }
+  }
+  return input as VolumeTaskData
+}
+
 type ReadingBookInfo = Pick<BookInfoLike, 'aid'>
 
 export const AppApiService = {
@@ -34,7 +41,7 @@ export const AppApiService = {
   },
 
   _encryptRequestBody(body: string) {
-    return `appver=1.0&timetoken=${Number(new Date())}&request=${btoa(body)}`
+    return `appver=1.0&timetoken=${Date.now()}&request=${btoa(body)}`
   },
 
   async _fetchChapterList(xhrTask: XhrTask) {
@@ -69,7 +76,9 @@ export const AppApiService = {
         bookInfo.XHRManager.taskFinished(xhrTask, false)
         const waitQueue = this.chapterListWaitQueue.slice()
         this.chapterListWaitQueue = []
-        waitQueue.forEach(async queuedXhr => this.loadVolumeChapters(queuedXhr))
+        waitQueue.forEach((queuedXhr) => {
+          void this.loadVolumeChapters(queuedXhr)
+        })
       }
       else {
         throw new Error(`Status ${response.status}`)
@@ -88,7 +97,7 @@ export const AppApiService = {
     const bookInfo = xhrVolumeRequest.bookInfo
     if (!bookInfo)
       return
-    const volumeData = (xhrVolumeRequest.data ?? {}) as VolumeTaskData
+    const volumeData = toVolumeTaskData(xhrVolumeRequest.data)
 
     if (!this.chapterListXml) {
       if (!this.chapterListWaitQueue.includes(xhrVolumeRequest)) {
@@ -143,7 +152,7 @@ export const AppApiService = {
     const bookInfo = xhrChapterRequest.bookInfo
     if (!bookInfo)
       return
-    const data = (xhrChapterRequest.data ?? {}) as VolumeTaskData
+    const data = toVolumeTaskData(xhrChapterRequest.data)
     const langParam = this._getApiLanguageParam(bookInfo)
     const requestBody = this._encryptRequestBody(`action=book&do=text&aid=${bookInfo.aid}&cid=${data.cid}&t=${langParam}`)
     const failureMessage = `${data.cName} 下载失败`

@@ -7,6 +7,15 @@ interface VolumeData {
   Text: TextEntry
 }
 
+function toVolumeData(input: unknown): VolumeData | null {
+  if (!input || typeof input !== 'object')
+    return null
+  const maybeData = input as Partial<VolumeData>
+  if (!maybeData.Text)
+    return null
+  return maybeData as VolumeData
+}
+
 export const VolumeLoader = {
   async loadWebVolumeText(xhr: XhrTask) {
     const bookInfo = xhr.bookInfo
@@ -125,7 +134,7 @@ export const VolumeLoader = {
   dealVolumeText(xhr: XhrTask, htmlText: string) {
     const bookInfo = xhr.bookInfo
     const VolumeIndex = xhr.VolumeIndex
-    const data = xhr.data as VolumeData | undefined
+    const data = toVolumeData(xhr.data)
     if (!bookInfo || typeof VolumeIndex !== 'number' || !data)
       return
     const volumeTextData = data.Text
@@ -186,7 +195,7 @@ export const VolumeLoader = {
           else if (contentNode instanceof HTMLDivElement && contentNode.className === 'divimage' && contentNode.hasAttribute('title')) {
             const imgSrc = contentNode.getAttribute('title')
             if (imgSrc) {
-              const imgUrl = new URL(imgSrc)
+              const imgUrl = new URL(imgSrc, CURRENT_URL.href)
               const imgFileName = imgUrl.pathname.split('/').pop() ?? ''
               const imgPathInEpub = `Images${imgUrl.pathname}`
 

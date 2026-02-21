@@ -79,15 +79,16 @@ export const XHRDownloadManager = {
     const taskName = xhrTask.type || xhrTask.url
 
     try {
-      if (!xhrTask.loadFun)
+      if (!xhrTask.loadFun) {
+        this._bookInfoInstance.logger.logError(`任务 ${taskName} 缺少 loadFun，已跳过。`)
+        this.taskFinished(xhrTask, Boolean(xhrTask.isCritical))
         return
-      const maybePromise = xhrTask.loadFun(xhrTask)
-      if (maybePromise && typeof maybePromise.then === 'function') {
-        maybePromise.catch((err: unknown) => {
-          this._bookInfoInstance?.logger.logError(`任务 ${taskName} 执行时发生意外错误: ${toErrorMessage(err)}`)
-          this.retryTask(xhrTask, `${taskName} 下载失败`) // 未被内部捕获时按原逻辑重试
-        })
       }
+      const maybePromise = xhrTask.loadFun(xhrTask)
+      Promise.resolve(maybePromise).catch((err: unknown) => {
+        this._bookInfoInstance?.logger.logError(`任务 ${taskName} 执行时发生意外错误: ${toErrorMessage(err)}`)
+        this.retryTask(xhrTask, `${taskName} 下载失败`) // 未被内部捕获时按原逻辑重试
+      })
     }
     catch (err: unknown) {
       this._bookInfoInstance.logger.logError(`任务 ${taskName} 执行时发生意外错误: ${toErrorMessage(err)}`)
@@ -139,6 +140,7 @@ export const XHRDownloadManager = {
       return
     if (this.hasCriticalFailure) {
       this._bookInfoInstance.logger.logWarn(`重试 ${xhrTask.type || xhrTask.url} 被跳过，因为关键下载已失败。`)
+      this.taskFinished(xhrTask, Boolean(xhrTask.isCritical))
       return
     }
 

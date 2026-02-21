@@ -11,7 +11,7 @@ interface PackageInfo {
   description: string
 }
 
-const packageInfo = Package as PackageInfo
+const packageInfo = Package as Partial<PackageInfo>
 
 export const CURRENT_URL = new URL(unsafeWindow.location.href)
 export const EPUB_EDITOR_CONFIG_UID = '24A08AE1-E132-458C-9E1D-6C998F16A666'
@@ -32,10 +32,10 @@ export const SUB_VOLUME_DELAY_DEFAULT_MS = 8000 // 分卷批量下载时，每�
 export const SUB_VOLUME_TIMEOUT_DEFAULT_MS = 1 * 60 * 1000 // 分卷批量下载时，单卷默认超时时间
 
 // project constants
-export const PROJECT_NAME = packageInfo.name
-export const PROJECT_DISPLAYNAME = packageInfo.displayName
-export const PROJECT_AUTHOR = packageInfo.author
-export const PROJECT_VERSION = packageInfo.version
-export const PROJECT_REPO = packageInfo.repository.url
+export const PROJECT_NAME = packageInfo.name ?? ''
+export const PROJECT_DISPLAYNAME = packageInfo.displayName ?? ''
+export const PROJECT_AUTHOR = packageInfo.author ?? ''
+export const PROJECT_VERSION = packageInfo.version ?? ''
+export const PROJECT_REPO = packageInfo.repository?.url ?? ''
 // description
-export const PROJECT_DESCRIPTION = packageInfo.description
+export const PROJECT_DESCRIPTION = packageInfo.description ?? ''

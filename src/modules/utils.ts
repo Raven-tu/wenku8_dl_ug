@@ -1,11 +1,13 @@
-interface GmRequestDetails {
+type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE' | 'HEAD' | 'OPTIONS'
+
+interface GmRequestDetails<T = unknown> {
   url: string
-  method?: string
+  method?: HttpMethod
   headers?: Record<string, string>
   data?: string
   timeout?: number
   responseType?: 'text' | 'arraybuffer' | 'blob' | 'document' | 'json' | 'stream'
-  onload?: (response: GmResponse) => void
+  onload?: (response: GmResponse<T>) => void
   onerror?: (error: Error) => void
   ontimeout?: (error: Error) => void
 }
@@ -20,10 +22,11 @@ export interface GmResponse<T = unknown> {
  * @param {object} details - GM_xmlhttpRequest 的参数对象
  * @returns {Promise<object>} Promise 对象，resolve 时返回 response 对象
  */
-export async function gmXmlHttpRequestAsync<T = unknown>(details: GmRequestDetails): Promise<GmResponse<T>> {
+export async function gmXmlHttpRequestAsync<T = unknown>(details: GmRequestDetails<T>): Promise<GmResponse<T>> {
   return new Promise((resolve, reject) => {
     GM_xmlhttpRequest({
       ...details,
+      timeout: details.timeout ?? XHR_TIMEOUT_MS,
       onload: response => resolve(response as GmResponse<T>),
       onerror: (err) => {
         console.error(`GM_xmlhttpRequest error for ${details.url}:`, err)
