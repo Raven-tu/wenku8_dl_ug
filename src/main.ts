@@ -10,6 +10,124 @@
 // @icon         https://www.wenku8.net/favicon.ico
 // ==/UserScript==
 
+import { SUB_VOLUME_DELAY_DEFAULT_MS, SUB_VOLUME_TIMEOUT_DEFAULT_MS } from './constants'
+
+const SUB_EPUB_CFG_KEY = 'WK8SubEpubBatchCfg'
+const SUB_EPUB_CFG_STORAGE_KEY = 'wk8:sub-epub-batch-cfg:v1'
+
+function loadSubEpubBatchConfigFromStorage() {
+  try {
+    const raw = localStorage.getItem(SUB_EPUB_CFG_STORAGE_KEY)
+    if (!raw)
+      return null
+    const parsed = JSON.parse(raw)
+    if (!parsed || typeof parsed !== 'object')
+      return null
+
+    const delayMs = Number(parsed.delayMs)
+    const timeoutMs = Number(parsed.timeoutMs)
+
+    return {
+      delayMs: Number.isFinite(delayMs) && delayMs > 0 ? Math.floor(delayMs) : SUB_VOLUME_DELAY_DEFAULT_MS,
+      timeoutMs: Number.isFinite(timeoutMs) && timeoutMs > 0 ? Math.floor(timeoutMs) : SUB_VOLUME_TIMEOUT_DEFAULT_MS,
+    }
+  }
+  catch {
+    return null
+  }
+}
+
+function saveSubEpubBatchConfigToStorage(cfg) {
+  try {
+    localStorage.setItem(SUB_EPUB_CFG_STORAGE_KEY, JSON.stringify({
+      delayMs: cfg.delayMs,
+      timeoutMs: cfg.timeoutMs,
+    }))
+  }
+  catch {
+    // 忽略存储失败（如无痕模式限制）
+  }
+}
+
+function getSubEpubBatchConfig() {
+  const currentCfg = unsafeWindow[SUB_EPUB_CFG_KEY]
+  if (!currentCfg || typeof currentCfg !== 'object') {
+    const savedCfg = loadSubEpubBatchConfigFromStorage()
+    unsafeWindow[SUB_EPUB_CFG_KEY] = {
+      delayMs: savedCfg?.delayMs ?? SUB_VOLUME_DELAY_DEFAULT_MS,
+      timeoutMs: savedCfg?.timeoutMs ?? SUB_VOLUME_TIMEOUT_DEFAULT_MS,
+    }
+  }
+  return unsafeWindow[SUB_EPUB_CFG_KEY]
+}
+
+function createSubEpubBatchConfigControls() {
+  const cfg = getSubEpubBatchConfig()
+  const wrapper = document.createElement('span')
+  wrapper.id = 'wk8SubEpubConfig'
+  wrapper.style.display = 'inline-flex'
+  wrapper.style.alignItems = 'center'
+  wrapper.style.gap = '6px'
+  wrapper.style.marginLeft = '8px'
+  wrapper.style.fontSize = '12px'
+
+  const delayLabel = document.createElement('span')
+  delayLabel.textContent = '间隔(秒)'
+
+  const delayInput = document.createElement('input')
+  delayInput.type = 'number'
+  delayInput.min = '1'
+  delayInput.step = '1'
+  delayInput.value = String(Math.max(1, Math.floor((Number(cfg.delayMs) || SUB_VOLUME_DELAY_DEFAULT_MS) / 1000)))
+  delayInput.style.width = '56px'
+
+  const timeoutLabel = document.createElement('span')
+  timeoutLabel.textContent = '超时(分钟)'
+
+  const timeoutInput = document.createElement('input')
+  timeoutInput.type = 'number'
+  timeoutInput.min = '1'
+  timeoutInput.step = '1'
+  timeoutInput.value = String(Math.max(1, Math.floor((Number(cfg.timeoutMs) || SUB_VOLUME_TIMEOUT_DEFAULT_MS) / 60000)))
+  timeoutInput.style.width = '64px'
+
+  const applyButton = document.createElement('button')
+  applyButton.type = 'button'
+  applyButton.textContent = '应用'
+  applyButton.style.cursor = 'pointer'
+
+  const applyConfig = () => {
+    const delaySeconds = Number(delayInput.value)
+    const timeoutMinutes = Number(timeoutInput.value)
+
+    cfg.delayMs = Number.isFinite(delaySeconds) && delaySeconds > 0
+      ? Math.floor(delaySeconds * 1000)
+      : SUB_VOLUME_DELAY_DEFAULT_MS
+    cfg.timeoutMs = Number.isFinite(timeoutMinutes) && timeoutMinutes > 0
+      ? Math.floor(timeoutMinutes * 60 * 1000)
+      : SUB_VOLUME_TIMEOUT_DEFAULT_MS
+
+    saveSubEpubBatchConfigToStorage(cfg)
+
+    delayInput.value = String(Math.floor(cfg.delayMs / 1000))
+    timeoutInput.value = String(Math.floor(cfg.timeoutMs / 60000))
+
+    UILogger.logInfo(`分卷批量配置已更新：间隔 ${delayInput.value}s，单卷超时 ${timeoutInput.value}min。`)
+  }
+
+  applyButton.addEventListener('click', applyConfig)
+  delayInput.addEventListener('change', applyConfig)
+  timeoutInput.addEventListener('change', applyConfig)
+
+  wrapper.appendChild(delayLabel)
+  wrapper.appendChild(delayInput)
+  wrapper.appendChild(timeoutLabel)
+  wrapper.appendChild(timeoutInput)
+  wrapper.appendChild(applyButton)
+
+  return wrapper
+}
+
 /**
  * 初始化用户脚本功能
  */
@@ -75,6 +193,10 @@ function addDownloadButtonsToCatalogPage() {
   aEleSubEpub.className = 'DownloadAllSub'
   aEleSubEpub.addEventListener('click', e => loopDownloadSub())
   titleElement.append(aEleSubEpub)
+
+  if (!document.getElementById('wk8SubEpubConfig')) {
+    titleElement.append(createSubEpubBatchConfigControls())
+  }
 
   // 分卷下载链接和按钮
   document.querySelectorAll('td.vcss').forEach((vcssCell) => { // 修改选择器为 td.vcss
@@ -178,16 +300,17 @@ function createDownloadButton(text, isEditMode, isDownloadAll) {
   }
 
   button.addEventListener('click', (event) => {
+    const targetEl = event.currentTarget as HTMLElement
     // 禁用按钮，避免重复点击，并改变样式
-    event.target.style.pointerEvents = 'none'
-    event.target.style.opacity = '0.6' // 降低不透明度表示禁用
-    event.target.style.color = '#aaa' // 禁用时文字颜色变浅
+    targetEl.style.pointerEvents = 'none'
+    targetEl.style.opacity = '0.6' // 降低不透明度表示禁用
+    targetEl.style.color = '#aaa' // 禁用时文字颜色变浅
     // 可以选择改变边框和背景色
     // event.target.style.borderColor = '#ddd';
     // event.target.style.backgroundColor = '#eee';
 
     const coordinator = new EpubBuilderCoordinator(isEditMode, isDownloadAll)
-    coordinator.start(event.target) // 传递事件目标，用于单卷下载时定位
+    coordinator.start(targetEl) // 传递事件目标，用于单卷下载时定位
 
     // 按钮在协调器完成或失败后重新启用 (由 EpubFileBuilder.build 处理)
     // 注意：这里的代码块只负责禁用按钮的样式，实际的 re-enabling 逻辑需要在 EpubBuilderCoordinator 或其调用的方法中实现
@@ -207,66 +330,67 @@ function createDownloadButton(text, isEditMode, isDownloadAll) {
 function loopDownloadSub() {
   const elements = document.querySelectorAll('a.ePubSub')
   const linksArray = Array.from(elements)
-  const delayBetweenClicks = 5000 // 每次点击后等待 5 秒
-  const checkInterval = 5000 // 检查构建状态的间隔 5 秒
-  const constructionTimeout = 60000 // 单个元素等待构建状态的最长总时间 60 秒
+  const cfg = getSubEpubBatchConfig()
+  const delayBetweenVolumesMs = Math.max(1000, Number(cfg.delayMs) || SUB_VOLUME_DELAY_DEFAULT_MS)
+  const singleVolumeTimeoutMs = Math.max(60 * 1000, Number(cfg.timeoutMs) || SUB_VOLUME_TIMEOUT_DEFAULT_MS)
+  const DOWNLOAD_FINISHED_EVENT = 'wk8:epub-download-finished'
 
-  UILogger.logInfo('循环下载分卷ePub(全本)...')
+  UILogger.logInfo(`循环下载分卷ePub(全本)...（间隔 ${Math.floor(delayBetweenVolumesMs / 1000)}s，超时 ${Math.floor(singleVolumeTimeoutMs / 60000)}min）`)
 
-  // 此函数用于处理 linksArray 中的每个元素
-  function processElement(index) {
-    // 如果索引超出数组范围，表示所有元素都已处理完毕
-    if (index >= linksArray.length) {
-      UILogger.logInfo('所有分卷下载任务处理完毕。')
-      return
-    }
-
-    const currentLink = linksArray[index]
-    UILogger.logInfo(`开始处理链接: ${currentLink.href} (索引: ${index})`)
-
-    // 开始检查当前元素的构建状态，并记录开始时间
-    checkConstructionStatus(index, Date.now())
+  if (linksArray.length === 0) {
+    UILogger.logWarn('未找到可下载的分卷按钮。')
+    return
   }
 
-  // 此函数递归检查构建状态，直到不再构建或超时
-  function checkConstructionStatus(index, startTime) {
-    const currentTime = Date.now()
-    const elapsedTime = currentTime - startTime // 计算已等待的时间
+  const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms))
 
-    // 确保 unsafeWindow 和 _isUnderConstruction 属性存在
-    const isUnderConstruction = typeof unsafeWindow !== 'undefined' && unsafeWindow._isUnderConstruction
+  const waitForVolumeFinished = (triggerElement, timeoutMs) => {
+    return new Promise((resolve, reject) => {
+      const timeoutId = setTimeout(() => {
+        window.removeEventListener(DOWNLOAD_FINISHED_EVENT, onFinished)
+        reject(new Error(`等待分卷完成超时(${Math.floor(timeoutMs / 1000)}s)`))
+      }, timeoutMs)
 
-    if (isUnderConstruction) {
-      if (elapsedTime > constructionTimeout) {
-        // 如果等待时间超过设定的超时时间
-        const errorMessage = `处理链接超时(${constructionTimeout / 1000}s): ${linksArray[index].href} (索引: ${index})，跳过此元素。`
-        UILogger.logError(errorMessage)
+      const onFinished = (event) => {
+        const detail = event?.detail
+        if (!detail || detail.triggerElement !== triggerElement)
+          return
 
-        // 跳过当前元素，处理下一个
-        processElement(index + 1)
+        clearTimeout(timeoutId)
+        window.removeEventListener(DOWNLOAD_FINISHED_EVENT, onFinished)
+        resolve(detail)
       }
-      else {
-        // 如果还在构建状态，但未超时，则等待一段时间后再次检查
-        UILogger.logInfo(`检测到正在构建状态，已等待 ${elapsedTime / 1000}s，${checkInterval / 1000}秒后将再次检查...`) // 避免频繁打印 info 日志
 
-        setTimeout(() => checkConstructionStatus(index, startTime), checkInterval)
-      }
-    }
-    else {
-      // 如果未处于构建状态
-      UILogger.logInfo('未处于构建状态，点击当前链接。')
-
-      // 点击当前链接
-      linksArray[index].click()
-      UILogger.logInfo(`Clicked link: ${linksArray[index].href}`)
-
-      // 等待设定的间隔时间后，处理下一个元素
-      setTimeout(() => processElement(index + 1), delayBetweenClicks)
-    }
+      window.addEventListener(DOWNLOAD_FINISHED_EVENT, onFinished)
+    })
   }
 
-  // 开始处理第一个元素
-  processElement(0)
+  const runSequential = async () => {
+    for (let index = 0; index < linksArray.length; index++) {
+      const currentLink = linksArray[index]
+      UILogger.logInfo(`开始处理第 ${index + 1}/${linksArray.length} 个分卷。`)
+
+      currentLink.click()
+
+      try {
+        await waitForVolumeFinished(currentLink, singleVolumeTimeoutMs)
+      }
+      catch (error) {
+        UILogger.logError(`第 ${index + 1} 个分卷处理失败或超时：${error?.message || error}`)
+      }
+
+      if (index < linksArray.length - 1) {
+        UILogger.logInfo(`为避免请求过密，等待 ${Math.floor(delayBetweenVolumesMs / 1000)} 秒后继续下一个分卷...`)
+        await sleep(delayBetweenVolumesMs)
+      }
+    }
+
+    UILogger.logInfo('所有分卷下载任务处理完毕。')
+  }
+
+  runSequential().catch((error) => {
+    UILogger.logError(`分卷循环下载中断：${error?.message || error}`)
+  })
 }
 
 /**

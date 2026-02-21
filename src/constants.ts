@@ -28,6 +28,8 @@ export const XHR_RETRY_DELAY_MS = 500 // XHR重试延迟基础时间
 export const VOLUME_ID_PREFIX = 'Volume' // 分卷文件、DOM ID前缀
 export const IMAGE_FILE_PREFIX = 'Img' // 图片文件、ID前缀
 export const TEXT_SPAN_PREFIX = 'Txt' // 文字ID前缀
+export const SUB_VOLUME_DELAY_DEFAULT_MS = 8000 // 分卷批量下载时，每卷之间默认等待时间
+export const SUB_VOLUME_TIMEOUT_DEFAULT_MS = 1 * 60 * 1000 // 分卷批量下载时，单卷默认超时时间
 
 // project constants
 export const PROJECT_NAME = packageInfo.name

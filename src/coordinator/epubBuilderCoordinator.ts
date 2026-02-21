@@ -22,6 +22,8 @@ export class EpubBuilderCoordinator {
   tasksCompletedOrSkipped: number
   XHRFail: boolean
   VOLUME_ID_PREFIX: string
+  triggerElement: HTMLElement | null
+  _finalized: boolean
 
   /**
    * @param {boolean} isEditingMode - 是否进入编辑模式
@@ -62,6 +64,8 @@ export class EpubBuilderCoordinator {
 
     // 常量引用
     this.VOLUME_ID_PREFIX = VOLUME_ID_PREFIX
+    this.triggerElement = null
+    this._finalized = false
   }
 
   /**
@@ -69,6 +73,8 @@ export class EpubBuilderCoordinator {
    * @param {HTMLElement} eventTarget - 触发下载的DOM元素 (用于单卷下载时定位)
    */
   start(eventTarget: HTMLElement) {
+    this.triggerElement = eventTarget || null
+    unsafeWindow._isUnderConstruction = true
     this.logger.clearLog() // 开始时清空日志
     this.refreshProgress(this, '开始处理书籍...')
 
@@ -88,6 +94,7 @@ export class EpubBuilderCoordinator {
       const buildBtn = document.getElementById('EidterBuildBtn') as HTMLButtonElement | null
       if (buildBtn)
         buildBtn.disabled = false
+      this.finalizeRun(false)
       return
     }
 
@@ -146,6 +153,7 @@ export class EpubBuilderCoordinator {
       const buildBtn = document.getElementById('EidterBuildBtn') as HTMLButtonElement | null
       if (buildBtn)
         buildBtn.disabled = false
+      this.finalizeRun(false)
       return
     }
 
@@ -181,20 +189,43 @@ export class EpubBuilderCoordinator {
     EpubFileBuilder.build(this)
       .then((result: unknown) => {
         // 构建遇到问题或没有准备好则跳过
-        if (!result || this.XHRFail) {
+        if (result && !this.XHRFail) {
+          this.refreshProgress(this, 'ePub文件已成功生成。')
+          this.logger.logInfo('ePub文件已成功生成。', result)
+          // 重新启用生成按钮 (如果存在)
+          const buildBtn = document.getElementById('EidterBuildBtn') as HTMLButtonElement | null
+          if (buildBtn)
+            buildBtn.disabled = false
+          this.finalizeRun(true)
           return
         }
 
-        this.refreshProgress(this, 'ePub文件已成功生成。')
-        this.logger.logInfo('ePub文件已成功生成。', result)
-        // 重新启用生成按钮 (如果存在)
-        const buildBtn = document.getElementById('EidterBuildBtn') as HTMLButtonElement | null
-        if (buildBtn)
-          buildBtn.disabled = false
+        // 仅当进入终态时再结束流程：关键失败，或任务全部完成但未构建成功
+        const allDone = this.XHRManager.areAllTasksDone()
+        if (this.XHRManager.hasCriticalFailure || (allDone && !this.ePubEidt)) {
+          this.finalizeRun(false)
+        }
       })
-      .finally(() => {
-        this.handleTaskCompletion()
+      .catch((error: unknown) => {
+        this.logger.logError(`构建流程异常: ${error instanceof Error ? error.message : String(error)}`)
+        this.finalizeRun(false)
       })
+  }
+
+  finalizeRun(success: boolean) {
+    if (this._finalized)
+      return
+
+    this._finalized = true
+    unsafeWindow._isUnderConstruction = false
+    window.dispatchEvent(new CustomEvent('wk8:epub-download-finished', {
+      detail: {
+        success,
+        triggerElement: this.triggerElement,
+        aid: this.aid,
+        isDownloadAll: this.isDownloadAll,
+      },
+    }))
   }
 
   /**

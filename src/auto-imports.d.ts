@@ -57,6 +57,8 @@ declare global {
   const PROJECT_VERSION: typeof import('./constants').PROJECT_VERSION
   const PROJECT_author: typeof import('./constants.js')['PROJECT_author']
   const PROJECT_displayName: typeof import('./constants.js')['PROJECT_displayName']
+  const SUB_VOLUME_DELAY_DEFAULT_MS: typeof import('./constants').SUB_VOLUME_DELAY_DEFAULT_MS
+  const SUB_VOLUME_TIMEOUT_DEFAULT_MS: typeof import('./constants').SUB_VOLUME_TIMEOUT_DEFAULT_MS
   const TEXT_SPAN_PREFIX: typeof import('./constants').TEXT_SPAN_PREFIX
   const UILogger: typeof import('./modules/uiLogger').UILogger
   const VOLUME_ID_PREFIX: typeof import('./constants').VOLUME_ID_PREFIX
