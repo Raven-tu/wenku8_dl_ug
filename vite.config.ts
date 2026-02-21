@@ -27,6 +27,7 @@ export default defineConfig({
         author: Package.author,
         icon: 'https://www.wenku8.net/favicon.ico',
         match: ['*://www.wenku8.net/*', '*://www.wenku8.cc/*'],
+        license: 'MIT',
         require: [
           // 'https://cdn.jsdelivr.net/npm/jszip@2.6.1/dist/jszip.min.js',  // add on build
           // 'https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js', // add on build
