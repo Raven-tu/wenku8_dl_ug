@@ -1,4 +1,5 @@
 import type { BookInfoLike, TextEntry, XhrTask } from '../types'
+import { toErrorMessage } from './errorUtils'
 
 interface AppChapterEntry {
   cid: string
@@ -15,12 +16,6 @@ interface VolumeTaskData {
 }
 
 type ReadingBookInfo = Pick<BookInfoLike, 'aid'>
-
-function getErrorMessage(error: unknown): string {
-  if (error instanceof Error)
-    return error.message
-  return String(error)
-}
 
 export const AppApiService = {
   volumeChapterData: new Map<string, AppChapterEntry[]>(),
@@ -81,7 +76,7 @@ export const AppApiService = {
       }
     }
     catch (error: unknown) {
-      bookInfo.logger.logError(`App章节目录下载失败: ${getErrorMessage(error)}`)
+      bookInfo.logger.logError(`App章节目录下载失败: ${toErrorMessage(error)}`)
       bookInfo.XHRManager.retryTask(xhrTask, 'App章节目录下载失败，重新下载')
     }
     finally {
@@ -201,7 +196,7 @@ export const AppApiService = {
       }
     }
     catch (error: unknown) {
-      bookInfo.logger.logError(`${failureMessage} 错误: ${getErrorMessage(error)}`)
+      bookInfo.logger.logError(`${failureMessage} 错误: ${toErrorMessage(error)}`)
       bookInfo.XHRManager.retryTask(xhrChapterRequest, failureMessage)
     }
   },
@@ -245,7 +240,7 @@ export const AppApiService = {
       }
     }
     catch (error: unknown) {
-      contentElement.innerHTML = `通过App接口加载内容失败: ${getErrorMessage(error)}`
+      contentElement.innerHTML = `通过App接口加载内容失败: ${toErrorMessage(error)}`
       console.error('App接口内容加载失败:', error)
     }
   },

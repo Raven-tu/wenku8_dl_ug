@@ -69,6 +69,7 @@ declare global {
   const fetchAsText: typeof import('./modules/utils').fetchAsText
   const gmXmlHttpRequestAsync: typeof import('./modules/utils').gmXmlHttpRequestAsync
   const monkeyWindow: typeof import('vite-plugin-monkey/dist/client').monkeyWindow
+  const toErrorMessage: typeof import('./modules/errorUtils').toErrorMessage
   const unsafeWindow: typeof import('vite-plugin-monkey/dist/client').unsafeWindow
 }
 // for type re-export

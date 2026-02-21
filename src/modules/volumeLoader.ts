@@ -1,15 +1,10 @@
 import type { ImageEntry, TextEntry, XhrTask } from '../types'
+import { toErrorMessage } from './errorUtils'
 
 interface VolumeData {
   vid: string
   vcssText?: string
   Text: TextEntry
-}
-
-function getErrorMessage(error: unknown): string {
-  if (error instanceof Error)
-    return error.message
-  return String(error)
 }
 
 export const VolumeLoader = {
@@ -40,7 +35,7 @@ export const VolumeLoader = {
       }
     }
     catch (error: unknown) {
-      bookInfo.logger.logError(`${failureMessage} 错误: ${getErrorMessage(error)}`)
+      bookInfo.logger.logError(`${failureMessage} 错误: ${toErrorMessage(error)}`)
       bookInfo.XHRManager.retryTask(xhr, failureMessage)
     }
   },
@@ -64,7 +59,7 @@ export const VolumeLoader = {
       bookInfo.XHRManager.taskFinished(xhr, false)
     }
     catch (error: unknown) {
-      bookInfo.logger.logError(`${failureMessage} 错误: ${getErrorMessage(error)}`)
+      bookInfo.logger.logError(`${failureMessage} 错误: ${toErrorMessage(error)}`)
       bookInfo.XHRManager.retryTask(xhr, failureMessage)
     }
   },
@@ -108,7 +103,7 @@ export const VolumeLoader = {
               img.src = imageInfo.ObjectURL
           }
           catch (error: unknown) {
-            bookInfo.logger.logError(`${imageInfo.idName} 创建Blob/ObjectURL失败: ${getErrorMessage(error)}`)
+            bookInfo.logger.logError(`${imageInfo.idName} 创建Blob/ObjectURL失败: ${toErrorMessage(error)}`)
             bookInfo.XHRManager.taskFinished(xhr, false)
           }
         }
@@ -122,7 +117,7 @@ export const VolumeLoader = {
       }
     }
     catch (error: unknown) {
-      bookInfo.logger.logError(`${failureMessage} 错误: ${getErrorMessage(error)}`)
+      bookInfo.logger.logError(`${failureMessage} 错误: ${toErrorMessage(error)}`)
       bookInfo.XHRManager.retryTask(xhr, failureMessage)
     }
   },

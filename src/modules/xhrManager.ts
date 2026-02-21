@@ -1,10 +1,5 @@
 import type { BookInfoLike, XhrTask } from '../types'
-
-function getErrorMessage(err: unknown): string {
-  if (err instanceof Error)
-    return err.message
-  return String(err)
-}
+import { toErrorMessage } from './errorUtils'
 
 export const XHRDownloadManager = {
   _XHRArr: [] as XhrTask[], // 下载请求列表
@@ -57,8 +52,6 @@ export const XHRDownloadManager = {
   _XHRLoad(xhrTask: XhrTask) {
     if (!this._bookInfoInstance)
       return
-    const bookInfo = this._bookInfoInstance
-    const taskName = xhrTask.type || xhrTask.url
     if (xhrTask.url && xhrTask.url.endsWith('/android.php')) {
       if (this._XHRIntervalID === null) {
         this._XHRIntervalID = setInterval(() => this._XHRLimitLoad(), this._XHRDelay)
@@ -67,45 +60,37 @@ export const XHRDownloadManager = {
       return
     }
 
-    try {
-      if (!xhrTask.loadFun)
-        return
-      const maybePromise = xhrTask.loadFun(xhrTask)
-      if (maybePromise && typeof maybePromise.then === 'function') {
-        maybePromise.catch((err: unknown) => {
-          bookInfo.logger.logError(`任务 ${taskName} 执行时发生意外错误: ${getErrorMessage(err)}`)
-          this.retryTask(xhrTask, `${taskName} 下载失败`) // 未被内部捕获时按原逻辑重试
-        })
-      }
-    }
-    catch (err: unknown) {
-      bookInfo.logger.logError(`任务 ${taskName} 执行时发生意外错误: ${getErrorMessage(err)}`)
-      this.retryTask(xhrTask, `${taskName} 下载失败`)
-    }
+    this._executeTask(xhrTask)
   },
 
   _XHRLimitLoad() {
     if (!this._bookInfoInstance)
       return
-    const bookInfo = this._bookInfoInstance
     const xhrTask = this._XHRLimitArr.shift()
     if (!xhrTask)
       return
 
+    this._executeTask(xhrTask)
+  },
+
+  _executeTask(xhrTask: XhrTask) {
+    if (!this._bookInfoInstance)
+      return
     const taskName = xhrTask.type || xhrTask.url
+
     try {
       if (!xhrTask.loadFun)
         return
       const maybePromise = xhrTask.loadFun(xhrTask)
       if (maybePromise && typeof maybePromise.then === 'function') {
         maybePromise.catch((err: unknown) => {
-          bookInfo.logger.logError(`任务 ${taskName} 执行时发生意外错误: ${getErrorMessage(err)}`)
-          this.retryTask(xhrTask, `${taskName} 下载失败`)
+          this._bookInfoInstance?.logger.logError(`任务 ${taskName} 执行时发生意外错误: ${toErrorMessage(err)}`)
+          this.retryTask(xhrTask, `${taskName} 下载失败`) // 未被内部捕获时按原逻辑重试
         })
       }
     }
     catch (err: unknown) {
-      bookInfo.logger.logError(`任务 ${taskName} 执行时发生意外错误: ${getErrorMessage(err)}`)
+      this._bookInfoInstance.logger.logError(`任务 ${taskName} 执行时发生意外错误: ${toErrorMessage(err)}`)
       this.retryTask(xhrTask, `${taskName} 下载失败`)
     }
   },
