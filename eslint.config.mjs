@@ -12,7 +12,7 @@ export default antfu({
       'no-undef': ['off'],
       'unused-imports/no-unused-vars': ['warn'],
       'no-unused-vars': ['off'],
-      'no-console': ['warn'],
+      'no-console': ['off'],
     },
     extends: [
       './.eslintrc-auto-import.json',
@@ -24,6 +24,7 @@ export default antfu({
     overrides: {
       'no-use-before-define': ['off'],
       '@typescript-eslint/no-use-before-define': ['off'],
+      'no-console': ['off'],
       'ts/ban-ts-comment': ['off'],
       'ts/explicit-function-return-type': ['off'],
       'ts/no-floating-promises': ['off'],
